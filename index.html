@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego de la Culebrita</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <main class="contenedor">
+    <h1>Culebrita</h1>
+
+    <div class="marcador">
+      <p>Puntos: <span id="puntos">0</span></p>
+      <p>Record: <span id="record">0</span></p>
+    </div>
+
+    <canvas id="tablero" width="400" height="400"></canvas>
+
+    <p id="mensaje">Presiona una flecha para comenzar</p>
+
+    <button id="botonReiniciar">Reiniciar juego</button>
+
+    <p class="ayuda">Usa las flechas del teclado o las teclas W A S D</p>
+  </main>
+
+  <script src="java.js"></script>
+</body>
+</html>
