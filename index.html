@@ -3,28 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Juego de la Culebrita</title>
-  <link rel="stylesheet" href="estilos.css">
+  <title>Piedra, papel o tijera</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <main class="juego">
+    <h1>Piedra, papel o tijera</h1>
+    <p class="subtitulo">Elige una opción y enfréntate a la computadora</p>
 
-  <main class="contenedor">
-    <h1>Culebrita</h1>
+    <section class="marcador">
+      <div class="caja"><span>Tú</span><strong id="puntos-usuario">0</strong></div>
+      <div class="caja"><span>Computadora</span><strong id="puntos-pc">0</strong></div>
+    </section>
 
-    <div class="marcador">
-      <p>Puntos: <span id="puntos">0</span></p>
-      <p>Record: <span id="record">0</span></p>
-    </div>
+    <section class="opciones">
+      <button class="opcion" data-eleccion="piedra"><span class="icono">&#9994;</span>Piedra</button>
+      <button class="opcion" data-eleccion="papel"><span class="icono">&#9995;</span>Papel</button>
+      <button class="opcion" data-eleccion="tijera"><span class="icono">&#9996;</span>Tijera</button>
+    </section>
 
-    <canvas id="tablero" width="400" height="400"></canvas>
+    <section class="elecciones">
+      <div class="caja"><span>Tu elección</span><strong id="eleccion-usuario">?</strong></div>
+      <div class="caja"><span>Computadora</span><strong id="eleccion-pc">?</strong></div>
+    </section>
 
-    <p id="mensaje">Presiona una flecha para comenzar</p>
-
-    <button id="botonReiniciar">Reiniciar juego</button>
-
-    <p class="ayuda">Usa las flechas del teclado o las teclas W A S D</p>
+    <p id="mensaje" class="mensaje">¡Haz tu jugada!</p>
+    <button id="reiniciar" class="reiniciar">Reiniciar marcador</button>
   </main>
 
-  <script src="java.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
