@@ -1,0 +1,60 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #0f172a, #334155);
+}
+
+.calculadora {
+  width: min(92vw, 320px);
+  padding: 22px;
+  background: #1e293b;
+  border-radius: 22px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+}
+
+h1 {
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.pantalla {
+  min-height: 92px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  text-align: right;
+  word-break: break-all;
+  background: #0f172a;
+  border-radius: 14px;
+}
+
+.operacion { min-height: 1.3rem; font-size: 0.95rem; color: #94a3b8; }
+.resultado { font-size: 2.2rem; font-weight: 600; color: #f8fafc; }
+.resultado.error { font-size: 1.1rem; color: #fca5a5; }
+
+.teclado { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+.tecla {
+  padding: 16px 0;
+  font-size: 1.25rem;
+  color: #f8fafc;
+  background: #334155;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.1s, filter 0.15s;
+}
+
+.tecla:hover { filter: brightness(1.2); }
+.tecla:active { transform: scale(0.95); }
+.tecla.operador { background: #6366f1; }
+.tecla.borrar { background: #ef4444; grid-column: span 3; }
+.tecla.igual { background: #22c55e; }
+.tecla.ancha { grid-column: span 2; }
