@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cronómetro digital</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="cronometro">
+    <h1>Cronómetro digital</h1>
+ 
+    <div class="pantalla" role="timer">
+      <span id="min">00</span>:<span id="seg">00</span>.<span id="cen">00</span>
+    </div>
+ 
+    <div class="botones">
+      <button id="btnIniciar" type="button">Iniciar</button>
+      <button id="btnPausar" type="button" disabled>Pausar</button>
+      <button id="btnContinuar" type="button" disabled>Continuar</button>
+      <button id="btnReiniciar" type="button" disabled>Reiniciar</button>
+    </div>
+  </main>
+ 
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #1f3a5f, #0f1c2e);
+}
+ 
+.cronometro {
+  width: min(92%, 420px);
+  padding: 32px 24px;
+  text-align: center;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+}
+ 
+h1 { margin-bottom: 20px; font-size: 1.4rem; }
+ 
+.pantalla {
+  margin-bottom: 24px;
+  padding: 18px 0;
+  font: 3rem Consolas, "Courier New", monospace;
+  color: #4fd1c5;
+  background: #0b1420;
+  border-radius: 12px;
+}
+ 
+.botones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+ 
+button {
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #2b6cb0;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+ 
+button:hover:not(:disabled) { filter: brightness(1.15); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+ 
+#btnPausar    { background: #dd6b20; }
+#btnContinuar { background: #2f855a; }
+#btnReiniciar { background: #c53030; }
