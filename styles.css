@@ -1,0 +1,50 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #1e3a8a, #6d28d9);
+  color: #1f2937;
+}
+
+.juego {
+  width: 100%; max-width: 420px; padding: 32px 28px;
+  text-align: center; background: #ffffff;
+  border-radius: 18px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+}
+
+h1 { font-size: 1.9rem; color: #1e3a8a; }
+.subtitulo { margin: 8px 0 24px; color: #6b7280; }
+.formulario label {
+  display: block; margin-bottom: 8px; font-weight: 600; text-align: left;
+}
+.campo { display: flex; gap: 10px; }
+
+input {
+  flex: 1; min-width: 0; padding: 12px; font-size: 1.1rem;
+  border: 2px solid #d1d5db; border-radius: 10px;
+}
+input:focus { outline: none; border-color: #6d28d9; }
+
+button {
+  padding: 12px 20px; font-size: 1rem; font-weight: 600; color: #ffffff;
+  background: #6d28d9; border: none; border-radius: 10px; cursor: pointer;
+}
+button:hover:not(:disabled) { background: #5b21b6; }
+button:disabled, input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.mensaje {
+  margin: 22px 0 16px; padding: 14px;
+  font-weight: 600; background: #eef2ff; border-radius: 10px;
+}
+.mensaje.mayor, .mensaje.menor { background: #fef3c7; color: #92400e; }
+.mensaje.acierto { background: #d1fae5; color: #065f46; }
+.mensaje.error { background: #fee2e2; color: #991b1b; }
+
+.marcador { margin-bottom: 20px; font-size: 1.1rem; }
+.marcador strong { margin-left: 6px; font-size: 1.5rem; color: #6d28d9; }
+
+button.secundario { width: 100%; color: #1e3a8a; background: #e0e7ff; }
+button.secundario:hover { background: #c7d2fe; }
