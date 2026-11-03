@@ -1,0 +1,34 @@
+:root {
+  --ok: #1b7a43;
+  --error: #b3261e;
+  --error-fondo: #fdecea;
+  --borde: #6b7482;
+  --foco: #1f5fbf;
+}
+body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
+form { max-width: 26rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.4rem; }
+.campo { margin-bottom: 1rem; }
+label { display: block; font-weight: 600; margin-bottom: .25rem; }
+input { width: 100%; padding: .55rem; box-sizing: border-box;
+        border: 2px solid var(--borde); border-radius: .4rem;
+        transition: border-color .2s, box-shadow .2s; }
+input:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.es-valido input { border-color: var(--ok); }
+.es-invalido input { border-color: var(--error); box-shadow: 0 0 0 3px #f9d7d4; }
+.mensaje { margin: .3rem 0 0; font-size: .875rem; color: var(--error); }
+.mensaje::before { content: "\26A0\FE0E "; }
+.mensaje[hidden], .resumen[hidden] { display: none; }
+.resumen { border-left: 4px solid var(--error); background: var(--error-fondo);
+           padding: .75rem 1rem; margin-bottom: 1rem; }
+button { padding: .6rem 1.2rem; font-size: 1rem; }
+button:disabled { opacity: .6; }
+.sacudir input { animation: sacudir .3s; }
+@keyframes sacudir {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  input { transition: none; }
+  .sacudir input { animation: none; }
+}

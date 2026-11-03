@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo 2: mensajes personalizados</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 26rem; }
+    label { display: block; margin-top: 1rem; font-weight: 600; }
+    input { width: 100%; padding: .5rem; box-sizing: border-box; }
+    button { margin-top: 1.2rem; }
+  </style>
+</head>
+<body>
+  <form id="registro">
+    <label for="usuario">Usuario</label>
+    <input id="usuario" name="usuario" type="text" required
+           minlength="4" maxlength="16" pattern="[A-Za-z0-9_]+">
+    <label for="correo">Correo electrónico</label>
+    <input id="correo" name="correo" type="email" required>
+    <label for="edad">Edad</label>
+    <input id="edad" name="edad" type="number" required min="18" max="99">
+    <button type="submit">Registrarme</button>
+  </form>
+  <p id="estado" role="status"></p>
+  <script>
+    const MENSAJES = {
+      usuario: {
+        valueMissing: 'Escribe un nombre de usuario.',
+        tooShort: 'El usuario debe tener al menos 4 caracteres.',
+        patternMismatch: 'Usa solo letras, números y guion bajo (_).'
+      },
+      correo: {
+        valueMissing: 'Escribe tu correo electrónico.',
+        typeMismatch: 'Escribe un correo con el formato nombre@dominio.com.'
+      },
+      edad: {
+        valueMissing: 'Indica tu edad.',
+        badInput: 'La edad debe ser un número.',
+        rangeUnderflow: 'Debes ser mayor de edad (18 años o más).',
+        rangeOverflow: 'Indica una edad entre 18 y 99 años.'
+      }
+    };
+    const ORDEN = ['valueMissing', 'typeMismatch', 'patternMismatch', 'tooShort',
+                   'badInput', 'rangeUnderflow', 'rangeOverflow'];
+
+    function mensajePara(campo) {
+      campo.setCustomValidity('');                // 1. limpiar el estado anterior
+      if (campo.validity.valid) return '';        // 2. reevaluar con las reglas nativas
+      const propios = MENSAJES[campo.name] ?? {};
+      const tipo = ORDEN.find((t) => campo.validity[t] && propios[t]);
+      return tipo ? propios[tipo] : campo.validationMessage;
+    }
+
+    function validarCampo(campo) {
+      campo.setCustomValidity(mensajePara(campo));
+    }
+
+    const formulario = document.querySelector('#registro');
+    const estado = document.querySelector('#estado');
+
+    formulario.addEventListener('input', (evento) => validarCampo(evento.target));
+    formulario.addEventListener('invalid', (evento) => validarCampo(evento.target), true);
+    formulario.addEventListener('submit', (evento) => {
+      evento.preventDefault();
+      estado.textContent = 'Datos válidos: el registro está listo para enviarse.';
+    });
+  </script>
+</body>
+</html>

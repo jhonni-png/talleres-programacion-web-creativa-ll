@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo 1: retroalimentación visual con CSS</title>
+  <style>
+    :root { --ok: #1b7a43; --error: #b3261e; --borde: #6b7482; --foco: #1f5fbf; }
+    body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 26rem; }
+    label { display: block; margin-top: 1rem; font-weight: 600; }
+    input { width: 100%; padding: .55rem; box-sizing: border-box;
+            border: 2px solid var(--borde); border-radius: .4rem;
+            transition: border-color .2s, box-shadow .2s; }
+    input:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+    .mensaje { display: none; margin: .3rem 0 0; font-size: .875rem;
+               color: var(--error); }
+    /* Estados tras la interacción de la persona */
+    input:user-valid { border-color: var(--ok); }
+    input:user-invalid { border-color: var(--error); box-shadow: 0 0 0 3px #f9d7d4; }
+    input:user-invalid + .mensaje { display: block; }
+    /* Respaldo: usa el placeholder vacío para saber si hubo escritura */
+    @supports not selector(:user-invalid) {
+      input:not(:placeholder-shown):valid { border-color: var(--ok); }
+      input:not(:placeholder-shown):invalid { border-color: var(--error); }
+      input:not(:placeholder-shown):invalid + .mensaje { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) { input { transition: none; } }
+  </style>
+</head>
+<body>
+  <form>
+    <label for="nombre">Nombre completo</label>
+    <input id="nombre" name="nombre" type="text" required minlength="3"
+           placeholder=" " autocomplete="name">
+    <p class="mensaje">Escribe al menos 3 caracteres.</p>
+    <label for="correo">Correo electrónico</label>
+    <input id="correo" name="correo" type="email" required
+           placeholder=" " autocomplete="email">
+    <p class="mensaje">Usa el formato nombre@dominio.com.</p>
+    <button type="submit">Enviar</button>
+  </form>
+</body>
+</html>

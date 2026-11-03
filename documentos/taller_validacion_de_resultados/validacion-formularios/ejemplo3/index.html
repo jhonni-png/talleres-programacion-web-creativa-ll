@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo 3: registro con validación avanzada</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script src="validacion.js" defer></script>
+</head>
+<body>
+  <form id="registro" novalidate>
+    <h1>Crear cuenta</h1>
+    <div id="resumen" class="resumen" role="alert" tabindex="-1" hidden></div>
+    <div class="campo">
+      <label for="usuario">Usuario</label>
+      <input id="usuario" name="usuario" type="text" required minlength="4"
+             maxlength="16" pattern="[A-Za-z0-9_]+" autocomplete="username"
+             aria-describedby="usuario-msg">
+      <p id="usuario-msg" class="mensaje" hidden></p>
+    </div>
+    <div class="campo">
+      <label for="correo">Correo electrónico</label>
+      <input id="correo" name="correo" type="email" required
+             autocomplete="email" aria-describedby="correo-msg">
+      <p id="correo-msg" class="mensaje" hidden></p>
+    </div>
+    <div class="campo">
+      <label for="clave">Contraseña (mínimo 8 caracteres)</label>
+      <input id="clave" name="clave" type="password" required minlength="8"
+             autocomplete="new-password" aria-describedby="clave-msg">
+      <p id="clave-msg" class="mensaje" hidden></p>
+    </div>
+    <div class="campo">
+      <label for="confirmacion">Confirmar contraseña</label>
+      <input id="confirmacion" name="confirmacion" type="password" required
+             autocomplete="new-password" aria-describedby="confirmacion-msg">
+      <p id="confirmacion-msg" class="mensaje" hidden></p>
+    </div>
+    <button type="submit">Crear cuenta</button>
+    <p id="estado" role="status"></p>
+  </form>
+</body>
+</html>
