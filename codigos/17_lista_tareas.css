@@ -59,3 +59,14 @@ li span { flex: 1; word-break: break-word; }
 li.completada span { color: #94a3b8; text-decoration: line-through; }
 .eliminar { padding: 6px 10px; font-size: 0.8rem; background: #c53030; }
 #mensajeVacio { text-align: center; color: #64748b; }
+
+/* Texto solo para lectores de pantalla (etiqueta del campo) */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

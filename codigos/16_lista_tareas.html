@@ -15,13 +15,14 @@
     <h1>Lista de tareas</h1>
 
     <form id="formTarea" class="formulario">
+      <label for="inputTarea" class="sr-only">Nueva tarea</label>
       <input type="text" id="inputTarea" placeholder="Escribe una tarea..."
         maxlength="80" autocomplete="off" required>
       <button type="submit">Agregar</button>
     </form>
 
     <ul id="listaTareas"></ul>
-    <p id="mensajeVacio">No hay tareas pendientes. ¡Agrega la primera!</p>
+    <p id="mensajeVacio" aria-live="polite">No hay tareas pendientes. ¡Agrega la primera!</p>
   </main>
 
   <script src="18_lista_tareas.js"></script>
