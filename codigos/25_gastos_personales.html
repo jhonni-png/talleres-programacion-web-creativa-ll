@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gestión de gastos personales - Taller 10">
+  <title>Gestión de Gastos Personales</title>
+  <link rel="stylesheet" href="26_gastos_personales.css">
+</head>
+<body>
+
+  <header class="encabezado">
+    <div class="encabezado__contenido">
+      <div class="marca">
+        <span class="marca__icono" aria-hidden="true">$</span>
+        <div>
+          <h1 class="marca__titulo">Gastos Personales</h1>
+          <p class="marca__subtitulo">Panel financiero &middot; Taller 10</p>
+        </div>
+      </div>
+      <p class="encabezado__fecha" id="fechaActual"></p>
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+
+    <section class="resumen" aria-label="Resumen financiero">
+      <article class="tarjeta tarjeta--saldo">
+        <h2 class="tarjeta__titulo">Saldo disponible</h2>
+        <p class="tarjeta__valor" id="saldoTotal">$ 0</p>
+        <p class="tarjeta__nota" id="notaSaldo">Ingresos menos gastos</p>
+      </article>
+
+      <article class="tarjeta tarjeta--ingreso">
+        <h2 class="tarjeta__titulo">Ingresos totales</h2>
+        <p class="tarjeta__valor" id="totalIngresos">$ 0</p>
+        <p class="tarjeta__nota">Dinero que ha entrado</p>
+      </article>
+
+      <article class="tarjeta tarjeta--gasto">
+        <h2 class="tarjeta__titulo">Gastos totales</h2>
+        <p class="tarjeta__valor" id="totalGastos">$ 0</p>
+        <p class="tarjeta__nota">Dinero que ha salido</p>
+      </article>
+
+      <article class="tarjeta tarjeta--movimientos">
+        <h2 class="tarjeta__titulo">Movimientos</h2>
+        <p class="tarjeta__valor" id="totalMovimientos">0</p>
+        <p class="tarjeta__nota">Transacciones registradas</p>
+      </article>
+    </section>
+
+    <section class="panel panel--categorias" aria-labelledby="tituloCategorias">
+
+      <h2 class="panel__titulo" id="tituloCategorias">Gastos por categor&iacute;a</h2>
+
+      <div class="categorias" id="listaCategorias"></div>
+
+      <p class="vacio" id="mensajeCategoriasVacio" hidden>A&uacute;n no hay gastos registrados.</p>
+
+    </section>
+
+    <div class="panel-principal">
+
+      <section class="panel" aria-labelledby="tituloFormulario">
+        <h2 class="panel__titulo" id="tituloFormulario">Nuevo movimiento</h2>
+
+        <form id="formMovimiento" novalidate>
+          <div class="campo">
+            <label for="descripcion">Descripci&oacute;n</label>
+            <input type="text" id="descripcion" name="descripcion"
+                   maxlength="60" placeholder="Ej: Pago de arriendo"
+                   autocomplete="off">
+            <small class="error" id="errorDescripcion"></small>
+          </div>
+
+          <div class="campo-doble">
+            <div class="campo">
+              <label for="tipo">Tipo de movimiento</label>
+              <select id="tipo" name="tipo">
+                <option value="">Selecciona el tipo</option>
+                <option value="ingreso">Ingreso</option>
+                <option value="gasto">Gasto</option>
+              </select>
+              <small class="error" id="errorTipo"></small>
+            </div>
+
+            <div class="campo">
+              <label for="categoria">Categor&iacute;a</label>
+              <select id="categoria" name="categoria"></select>
+              <small class="error" id="errorCategoria"></small>
+            </div>
+          </div>
+
+          <div class="campo-doble">
+            <div class="campo">
+              <label for="valor">Valor ($)</label>
+              <input type="number" id="valor" name="valor"
+                     min="0" step="any" placeholder="0" inputmode="decimal">
+              <small class="error" id="errorValor"></small>
+            </div>
+
+            <div class="campo">
+              <label for="fecha">Fecha</label>
+              <input type="date" id="fecha" name="fecha">
+              <small class="error" id="errorFecha"></small>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button type="submit" class="btn btn--primario" id="btnGuardar">
+              Guardar movimiento
+            </button>
+            <button type="button" class="btn btn--secundario" id="btnLimpiar">
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="tituloListado">
+        <div class="listado__cabecera">
+          <h2 class="panel__titulo" id="tituloListado">Historial de movimientos</h2>
+
+          <div class="filtros" id="filtros" role="group"
+               aria-label="Filtrar movimientos por tipo">
+            <button type="button" class="filtro activo" data-filtro="todos"
+                    aria-pressed="true">Todos</button>
+            <button type="button" class="filtro" data-filtro="ingreso"
+                    aria-pressed="false">Ingresos</button>
+            <button type="button" class="filtro" data-filtro="gasto"
+                    aria-pressed="false">Gastos</button>
+          </div>
+        </div>
+
+        <div class="herramientas">
+
+          <div class="campo campo--compacto">
+
+            <label for="busqueda">Buscar por descripci&oacute;n</label>
+
+            <input type="search" id="busqueda" placeholder="Ej: arriendo"
+                   autocomplete="off" maxlength="60">
+
+          </div>
+
+          <div class="campo campo--compacto">
+
+            <label for="filtroCategoria">Categor&iacute;a</label>
+
+            <select id="filtroCategoria"></select>
+
+          </div>
+
+        </div>
+
+        <div class="tabla-contenedor" id="tablaContenedor">
+          <table class="tabla">
+            <caption class="solo-lectores">Listado de movimientos financieros</caption>
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Descripci&oacute;n</th>
+                <th scope="col">Categor&iacute;a</th>
+                <th scope="col">Tipo</th>
+                <th scope="col" class="columna-valor">Valor</th>
+                <th scope="col">Acci&oacute;n</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+          </table>
+        </div>
+
+        <p class="vacio" id="mensajeVacio" hidden></p>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="pie">
+    <p>
+      Universidad de Caldas &middot; Programaci&oacute;n Web Creativa II
+      &middot; Taller 10
+    </p>
+  </footer>
+
+  <script src="27_gastos_personales.js"></script>
+</body>
+</html>

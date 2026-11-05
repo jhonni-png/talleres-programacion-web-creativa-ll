@@ -1,0 +1,657 @@
+/* ==========================================================
+   Taller 10 - Sistema de Gestión de Gastos Personales
+   Universidad de Caldas - Programación Web Creativa II
+   ========================================================== */
+
+/* ---------- 1. Variables de diseño ---------- */
+:root {
+  --azul-oscuro: #0b1f3a;
+  --azul-medio: #16325c;
+  --azul-claro: #e8eef7;
+  --verde: #12a150;
+  --verde-oscuro: #0c7a3a;
+  --verde-fondo: #e6f6ed;
+  --rojo: #d93a3a;
+  --rojo-oscuro: #b02a2a;
+  --rojo-fondo: #fdeaea;
+  --blanco: #ffffff;
+  --fondo: #f3f6fb;
+  --texto: #1b2a41;
+  --texto-suave: #5b6b82;
+  --borde: #d9e1ee;
+  --radio: 14px;
+  --sombra: 0 6px 20px rgba(11, 31, 58, 0.08);
+}
+
+/* ---------- 2. Reinicio y base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--texto);
+  background-color: var(--fondo);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ---------- 3. Encabezado (Flexbox) ---------- */
+.encabezado {
+  background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-medio));
+  color: var(--blanco);
+  padding: 20px 24px;
+}
+
+.encabezado__contenido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.marca__icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background-color: var(--verde);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.marca__titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.marca__subtitulo {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.encabezado__fecha {
+  font-size: 0.9rem;
+  text-transform: capitalize;
+  opacity: 0.9;
+}
+
+/* ---------- 4. Contenedor y avisos ---------- */
+.contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.aviso {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.aviso--exito {
+  color: var(--verde-oscuro);
+  background-color: var(--verde-fondo);
+  border-color: var(--verde);
+}
+
+.aviso--error {
+  color: var(--rojo-oscuro);
+  background-color: var(--rojo-fondo);
+  border-color: var(--rojo);
+}
+
+/* ---------- 5. Tarjetas de indicadores (Grid) ---------- */
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.tarjeta {
+  padding: 20px;
+  background-color: var(--blanco);
+  border: 1px solid var(--borde);
+  border-top: 5px solid var(--azul-medio);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.tarjeta__titulo {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.tarjeta__valor {
+  margin: 8px 0 4px;
+  font-size: 1.7rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.tarjeta__nota {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.tarjeta--saldo {
+  color: var(--blanco);
+  background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-medio));
+  border-color: var(--azul-oscuro);
+  border-top-color: var(--verde);
+}
+
+.tarjeta--saldo .tarjeta__titulo,
+.tarjeta--saldo .tarjeta__nota {
+  color: #c9d6ea;
+}
+
+.tarjeta--saldo.saldo-negativo {
+  border-top-color: var(--rojo);
+}
+
+.tarjeta--saldo.saldo-negativo .tarjeta__valor {
+  color: #ff9a9a;
+}
+
+.tarjeta--ingreso {
+  border-top-color: var(--verde);
+}
+
+.tarjeta--ingreso .tarjeta__valor {
+  color: var(--verde);
+}
+
+.tarjeta--gasto {
+  border-top-color: var(--rojo);
+}
+
+.tarjeta--gasto .tarjeta__valor {
+  color: var(--rojo);
+}
+
+/* ---------- 6. Distribución principal (Grid) ---------- */
+.panel-principal {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.panel {
+  padding: 24px;
+  background-color: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  min-width: 0;
+}
+
+.panel__titulo {
+  margin-bottom: 18px;
+  font-size: 1.15rem;
+  color: var(--azul-oscuro);
+}
+
+/* ---------- 7. Formulario ---------- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+
+.campo-doble {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--azul-medio);
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--texto);
+  background-color: var(--blanco);
+  border: 1.5px solid var(--borde);
+  border-radius: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--azul-medio);
+  box-shadow: 0 0 0 3px rgba(22, 50, 92, 0.18);
+}
+
+select:disabled {
+  color: var(--texto-suave);
+  background-color: var(--fondo);
+}
+
+.campo--error input,
+.campo--error select {
+  border-color: var(--rojo);
+  background-color: var(--rojo-fondo);
+}
+
+.error {
+  min-height: 1em;
+  font-size: 0.8rem;
+  color: var(--rojo-oscuro);
+}
+
+.acciones {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn {
+  padding: 11px 18px;
+  font: inherit;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn--primario {
+  flex: 1;
+  color: var(--blanco);
+  background-color: var(--azul-oscuro);
+}
+
+.btn--primario:hover {
+  background-color: var(--azul-medio);
+}
+
+.btn--secundario {
+  color: var(--azul-oscuro);
+  background-color: var(--azul-claro);
+}
+
+.btn--secundario:hover {
+  background-color: #d5e0f0;
+}
+
+/* ---------- 8. Filtros y tabla ---------- */
+.listado__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.listado__cabecera .panel__titulo {
+  margin-bottom: 0;
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+}
+
+.filtro {
+  padding: 7px 16px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--azul-medio);
+  background-color: var(--blanco);
+  border: 1.5px solid var(--borde);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.filtro:hover {
+  background-color: var(--azul-claro);
+}
+
+.filtro.activo {
+  color: var(--blanco);
+  background-color: var(--azul-oscuro);
+  border-color: var(--azul-oscuro);
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tabla th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  background-color: var(--fondo);
+  border-bottom: 2px solid var(--borde);
+}
+
+.tabla td {
+  padding: 12px;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:hover {
+  background-color: #f8fafd;
+}
+
+.columna-valor,
+.celda-valor {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.celda-valor {
+  font-weight: 700;
+}
+
+.valor--ingreso {
+  color: var(--verde);
+}
+
+.valor--gasto {
+  color: var(--rojo);
+}
+
+.insignia {
+  display: inline-block;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.insignia--ingreso {
+  color: var(--verde-oscuro);
+  background-color: var(--verde-fondo);
+}
+
+.insignia--gasto {
+  color: var(--rojo-oscuro);
+  background-color: var(--rojo-fondo);
+}
+
+.btn-eliminar {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--rojo-oscuro);
+  background-color: var(--rojo-fondo);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-eliminar:hover {
+  color: var(--blanco);
+  background-color: var(--rojo);
+}
+
+.vacio {
+  padding: 36px 16px;
+  text-align: center;
+  color: var(--texto-suave);
+  background-color: var(--fondo);
+  border: 2px dashed var(--borde);
+  border-radius: 12px;
+}
+
+/* ---------- Retos: búsqueda, edición y resumen por categoría ---------- */
+
+.herramientas {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.campo--compacto {
+  margin-bottom: 8px;
+}
+
+.panel--categorias {
+  margin-bottom: 24px;
+}
+
+.categorias {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 32px;
+}
+
+.categoria__fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+}
+
+.categoria__nombre {
+  font-weight: 600;
+  color: var(--azul-oscuro);
+}
+
+.categoria__monto {
+  color: var(--texto-suave);
+  text-align: right;
+}
+
+.categoria__monto strong {
+  color: var(--rojo);
+}
+
+.barra {
+  height: 10px;
+  overflow: hidden;
+  background-color: var(--azul-claro);
+  border-radius: 999px;
+}
+
+.barra__relleno {
+  height: 100%;
+  background: linear-gradient(90deg, var(--azul-medio), var(--rojo));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.acciones-fila {
+  display: flex;
+  gap: 8px;
+}
+
+.tabla th,
+.tabla td {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.btn-editar {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--azul-oscuro);
+  background-color: var(--azul-claro);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-editar:hover {
+  color: var(--blanco);
+  background-color: var(--azul-medio);
+}
+
+.tabla tbody tr.fila--editando {
+  background-color: var(--azul-claro);
+}
+
+.panel--editando {
+  border-color: var(--azul-medio);
+  box-shadow: 0 0 0 3px rgba(22, 50, 92, 0.15), var(--sombra);
+}
+
+/* ---------- 9. Pie de página ---------- */
+.pie {
+  padding: 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+/* ---------- 10. Diseño responsive (Media queries) ---------- */
+@media (max-width: 1000px) {
+  .resumen {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .panel-principal {
+    grid-template-columns: 1fr;
+  }
+
+  .categorias {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .contenedor {
+    padding: 16px;
+  }
+
+  .encabezado__contenido {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-doble,
+  .herramientas {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  /* La tabla se transforma en tarjetas apiladas */
+  .tabla thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .tabla,
+  .tabla tbody,
+  .tabla tr,
+  .tabla td {
+    display: block;
+    width: 100%;
+  }
+
+  .tabla tr {
+    margin-bottom: 14px;
+    padding: 6px 12px;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+  }
+
+  .tabla td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    text-align: right;
+    border-bottom: 1px dashed var(--borde);
+  }
+
+  .tabla td:last-child {
+    border-bottom: none;
+  }
+
+  .tabla td::before {
+    content: attr(data-label);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+}
