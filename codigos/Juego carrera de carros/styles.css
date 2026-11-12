@@ -1,0 +1,377 @@
+/* ===================================================================
+   NEON TURBO - Hoja de estilos
+   Universidad de Caldas - Programación Web Creativa II
+   =================================================================== */
+
+/* ---------- 1. Variables y reinicio ---------- */
+:root {
+  --fondo: #07080f;
+  --panel: #10131f;
+  --cian: #00e5ff;
+  --magenta: #ff2e93;
+  --amarillo: #ffd23f;
+  --texto: #e8ecff;
+  --tenue: #8791b5;
+  --alto-panel: 64px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 0%, #1b1040 0%, transparent 60%),
+    radial-gradient(circle at 50% 100%, #06283a 0%, transparent 55%),
+    var(--fondo);
+  color: var(--texto);
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.oculto {
+  display: none !important;
+}
+
+/* ---------- 2. Contenedor principal (relación 2:3, adaptable) ---------- */
+.juego {
+  width: min(100vw, calc((100vh - var(--alto-panel)) * 2 / 3));
+  width: min(100vw, calc((100dvh - var(--alto-panel)) * 2 / 3));
+}
+
+/* ---------- 3. Panel superior ---------- */
+.panel {
+  height: var(--alto-panel);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 6px;
+  background: linear-gradient(180deg, #171b2e, var(--panel));
+  border: 2px solid rgba(0, 229, 255, 0.55);
+  border-bottom: none;
+  border-radius: 14px 14px 0 0;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.dato__etiqueta {
+  font-size: clamp(0.5rem, 1.9vw, 0.7rem);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--tenue);
+}
+
+.dato__valor {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: clamp(0.85rem, 3.6vw, 1.3rem);
+  font-weight: bold;
+  color: var(--cian);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+  white-space: nowrap;
+}
+
+.dato__valor--vidas {
+  color: var(--magenta);
+  text-shadow: 0 0 10px rgba(255, 46, 147, 0.7);
+  letter-spacing: 1px;
+}
+
+.dato__valor--record {
+  color: var(--amarillo);
+  text-shadow: 0 0 10px rgba(255, 210, 63, 0.7);
+}
+
+/* ---------- 4. Escenario y lienzo ---------- */
+.escenario {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #000;
+  border: 2px solid rgba(0, 229, 255, 0.55);
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.25);
+}
+
+#lienzo {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- 5. Pantallas superpuestas (inicio, pausa, game over) ---------- */
+.pantalla {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 2.4vh, 18px);
+  padding: 16px;
+  overflow: auto;
+  text-align: center;
+  background: radial-gradient(circle, rgba(7, 8, 15, 0.55), rgba(7, 8, 15, 0.92));
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: aparecer 0.35s ease-out;
+}
+
+.etiqueta-superior {
+  font-size: clamp(0.65rem, 2.2vw, 0.8rem);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--tenue);
+}
+
+.titulo {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: clamp(2.4rem, 12vw, 4.6rem);
+  font-style: italic;
+  line-height: 0.95;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, var(--cian), var(--magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(0, 229, 255, 0.55));
+}
+
+.titulo--mediano {
+  font-size: clamp(2rem, 9vw, 3.4rem);
+}
+
+.titulo--derrota {
+  font-size: clamp(2rem, 9.5vw, 3.6rem);
+  background: linear-gradient(90deg, var(--magenta), var(--amarillo));
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 14px rgba(255, 46, 147, 0.6));
+}
+
+.subtitulo {
+  max-width: 28ch;
+  font-size: clamp(0.85rem, 3vw, 1.05rem);
+  color: var(--texto);
+}
+
+.pista {
+  font-size: clamp(0.7rem, 2.4vw, 0.85rem);
+  color: var(--tenue);
+}
+
+.guia {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: clamp(0.72rem, 2.6vw, 0.9rem);
+  color: var(--texto);
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  color: var(--cian);
+  background: #1a1f33;
+  border: 1px solid rgba(0, 229, 255, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 2px 0 rgba(0, 229, 255, 0.35);
+}
+
+/* ---------- 6. Botones ---------- */
+.boton {
+  padding: 14px 34px;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: clamp(1rem, 4vw, 1.3rem);
+  letter-spacing: 2px;
+  color: #07080f;
+  background: linear-gradient(90deg, var(--cian), #7cf3ff);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.65);
+  animation: pulso 1.4s ease-in-out infinite;
+  transition: transform 0.15s ease;
+}
+
+.boton:hover {
+  transform: scale(1.06);
+}
+
+.boton:active {
+  transform: scale(0.97);
+}
+
+.boton-pausa {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 6;
+  width: 38px;
+  height: 38px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--cian);
+  background: rgba(16, 19, 31, 0.6);
+  border: 2px solid rgba(0, 229, 255, 0.6);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.boton-pausa:hover {
+  background: rgba(0, 229, 255, 0.25);
+}
+
+/* ---------- 7. Pantalla de Game Over ---------- */
+.estadisticas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: min(100%, 320px);
+}
+
+.estadistica {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px;
+  background: rgba(16, 19, 31, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 10px;
+}
+
+.estadistica span {
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--tenue);
+}
+
+.estadistica strong {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: clamp(1rem, 4.4vw, 1.4rem);
+  color: var(--cian);
+}
+
+.estadistica--ancha {
+  grid-column: 1 / -1;
+  border-color: rgba(255, 210, 63, 0.5);
+}
+
+.estadistica--ancha strong {
+  color: var(--amarillo);
+}
+
+.insignia-record {
+  padding: 4px 16px;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: clamp(0.95rem, 3.6vw, 1.2rem);
+  letter-spacing: 2px;
+  color: #07080f;
+  background: var(--amarillo);
+  border-radius: 999px;
+  animation: parpadeo 0.9s ease-in-out infinite;
+}
+
+/* ---------- 8. Controles táctiles ---------- */
+.controles-tactiles {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: none;
+  justify-content: space-between;
+  padding: 14px;
+  pointer-events: none;
+}
+
+.boton-tactil {
+  width: clamp(64px, 22vw, 96px);
+  aspect-ratio: 1 / 1;
+  font-size: 1.8rem;
+  color: var(--cian);
+  background: rgba(16, 19, 31, 0.55);
+  border: 2px solid rgba(0, 229, 255, 0.7);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.boton-tactil.activo {
+  background: rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.7);
+}
+
+@media (pointer: coarse), (max-width: 700px) {
+  .controles-tactiles {
+    display: flex;
+  }
+}
+
+/* ---------- 9. Animaciones ---------- */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulso {
+  0%,
+  100% {
+    box-shadow: 0 0 18px rgba(0, 229, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 34px rgba(0, 229, 255, 0.95);
+  }
+}
+
+@keyframes parpadeo {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton,
+  .insignia-record,
+  .pantalla {
+    animation: none;
+  }
+}

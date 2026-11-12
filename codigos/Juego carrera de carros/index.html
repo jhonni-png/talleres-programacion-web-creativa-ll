@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Neon Turbo | Videojuego de carreras de carros</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <main class="juego">
+
+    <!-- Panel superior: puntuación, velocidad, distancia, vidas y récord -->
+    <header class="panel" aria-label="Panel de información de la partida">
+      <div class="dato">
+        <span class="dato__etiqueta">Puntos</span>
+        <span class="dato__valor" id="hud-puntos">0</span>
+      </div>
+      <div class="dato">
+        <span class="dato__etiqueta">Km/h</span>
+        <span class="dato__valor" id="hud-velocidad">0</span>
+      </div>
+      <div class="dato">
+        <span class="dato__etiqueta">Distancia</span>
+        <span class="dato__valor" id="hud-distancia">0 m</span>
+      </div>
+      <div class="dato">
+        <span class="dato__etiqueta">Vidas</span>
+        <span class="dato__valor dato__valor--vidas" id="hud-vidas">♥♥♥</span>
+      </div>
+      <div class="dato">
+        <span class="dato__etiqueta">Récord</span>
+        <span class="dato__valor dato__valor--record" id="hud-record">0</span>
+      </div>
+    </header>
+
+    <!-- Escenario del juego -->
+    <section class="escenario">
+
+      <canvas id="lienzo" width="480" height="720"
+              aria-label="Carretera del videojuego de carreras"></canvas>
+
+      <button class="boton-pausa" id="boton-pausa" type="button"
+              aria-label="Pausar o reanudar la partida">II</button>
+
+      <!-- Pantalla de inicio -->
+      <div class="pantalla" id="pantalla-inicio">
+        <p class="etiqueta-superior">Universidad de Caldas · Taller extra 23</p>
+        <h1 class="titulo">NEON<br>TURBO</h1>
+        <p class="subtitulo">Esquiva el tráfico, sobrevive y supera tu récord.</p>
+        <button class="boton" id="boton-iniciar" type="button">INICIAR CARRERA</button>
+        <ul class="guia">
+          <li><kbd>←</kbd> <kbd>→</kbd> o <kbd>A</kbd> <kbd>D</kbd> para mover el carro</li>
+          <li><kbd>Espacio</kbd> para iniciar o pausar</li>
+        </ul>
+        <p class="pista">En el celular usa los botones de la pantalla.</p>
+      </div>
+
+      <!-- Pantalla de pausa -->
+      <div class="pantalla oculto" id="pantalla-pausa">
+        <h2 class="titulo titulo--mediano">PAUSA</h2>
+        <p class="subtitulo">La carrera está detenida.</p>
+        <button class="boton" id="boton-reanudar" type="button">REANUDAR</button>
+        <p class="pista">También puedes pulsar <kbd>Espacio</kbd></p>
+      </div>
+
+      <!-- Pantalla de Game Over -->
+      <div class="pantalla oculto" id="pantalla-gameover">
+        <h2 class="titulo titulo--derrota">GAME OVER</h2>
+        <p class="insignia-record oculto" id="go-insignia">¡NUEVO RÉCORD!</p>
+        <div class="estadisticas">
+          <div class="estadistica">
+            <span>Puntos</span>
+            <strong id="go-puntos">0</strong>
+          </div>
+          <div class="estadistica">
+            <span>Distancia</span>
+            <strong id="go-distancia">0 m</strong>
+          </div>
+          <div class="estadistica">
+            <span>Tiempo</span>
+            <strong id="go-tiempo">00:00</strong>
+          </div>
+          <div class="estadistica">
+            <span>Nivel</span>
+            <strong id="go-nivel">1</strong>
+          </div>
+          <div class="estadistica estadistica--ancha">
+            <span>Récord</span>
+            <strong id="go-record">0</strong>
+          </div>
+        </div>
+        <button class="boton" id="boton-reiniciar" type="button">REINTENTAR</button>
+        <p class="pista">Pulsa <kbd>Espacio</kbd> para jugar de nuevo</p>
+      </div>
+
+      <!-- Controles táctiles (se muestran en dispositivos móviles) -->
+      <div class="controles-tactiles">
+        <button class="boton-tactil" id="boton-izquierda" type="button"
+                aria-label="Mover a la izquierda">←</button>
+        <button class="boton-tactil" id="boton-derecha" type="button"
+                aria-label="Mover a la derecha">→</button>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
