@@ -3,158 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestión de Estudiantes</title>
+  <title>Memory Quest | Taller 14 - Juego de Memoria</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <header class="encabezado">
-    <div class="encabezado__marca">
-      <span class="encabezado__logo" aria-hidden="true">UC</span>
-      <div>
-        <h1>Sistema de Gestión de Estudiantes</h1>
-        <p>Panel administrativo académico &middot; Programación Web Creativa II</p>
+  <!-- Fondo decorativo animado -->
+  <div class="fondo-animado" aria-hidden="true">
+    <span class="burbuja burbuja-1"></span>
+    <span class="burbuja burbuja-2"></span>
+    <span class="burbuja burbuja-3"></span>
+    <span class="burbuja burbuja-4"></span>
+    <span class="burbuja burbuja-5"></span>
+    <span class="burbuja burbuja-6"></span>
+  </div>
+
+  <main class="app">
+
+    <!-- PANTALLA INICIAL -->
+    <section id="pantalla-inicio" class="pantalla pantalla-inicio">
+      <p class="etiqueta">Programación Web Creativa II</p>
+      <h1 class="titulo">Memory <span>Quest</span></h1>
+      <p class="subtitulo">
+        Encuentra las 8 parejas de tarjetas en el menor tiempo
+        y con la menor cantidad de movimientos.
+      </p>
+
+      <div class="vista-previa" aria-hidden="true">
+        <span class="mini-tarjeta mini-1">🚀</span>
+        <span class="mini-tarjeta mini-2">🌟</span>
+        <span class="mini-tarjeta mini-3">🎮</span>
+        <span class="mini-tarjeta mini-4">🦊</span>
       </div>
-    </div>
-    <p class="encabezado__fecha" id="fechaActual"></p>
-  </header>
 
-  <main class="contenedor">
+      <ul class="instrucciones">
+        <li><strong>1.</strong> Haz clic en una tarjeta para girarla.</li>
+        <li><strong>2.</strong> Gira una segunda tarjeta y busca la pareja.</li>
+        <li><strong>3.</strong> Encuentra las 8 parejas para ganar.</li>
+      </ul>
 
-    <section class="indicadores" aria-label="Indicadores generales">
-      <article class="tarjeta tarjeta--total">
-        <p class="tarjeta__titulo">Total de estudiantes</p>
-        <p class="tarjeta__valor" id="indTotal">0</p>
-        <p class="tarjeta__detalle">Registros almacenados</p>
-      </article>
-      <article class="tarjeta tarjeta--promedio">
-        <p class="tarjeta__titulo">Promedio general</p>
-        <p class="tarjeta__valor" id="indPromedio">0.00</p>
-        <p class="tarjeta__detalle">Escala de 0.0 a 5.0</p>
-      </article>
-      <article class="tarjeta tarjeta--aprobados">
-        <p class="tarjeta__titulo">Aprobados</p>
-        <p class="tarjeta__valor" id="indAprobados">0</p>
-        <p class="tarjeta__detalle">Calificación &ge; 3.0</p>
-      </article>
-      <article class="tarjeta tarjeta--reprobados">
-        <p class="tarjeta__titulo">Reprobados</p>
-        <p class="tarjeta__valor" id="indReprobados">0</p>
-        <p class="tarjeta__detalle">Calificación &lt; 3.0</p>
-      </article>
+      <button id="btn-iniciar" class="boton boton-principal" type="button">
+        ▶ Iniciar juego
+      </button>
     </section>
 
-    <div class="disposicion">
+    <!-- PANTALLA DE JUEGO -->
+    <section id="pantalla-juego" class="pantalla pantalla-juego oculto">
 
-      <section class="panel" aria-labelledby="tituloFormulario">
-        <h2 class="panel__titulo" id="tituloFormulario">Registrar estudiante</h2>
+      <header class="encabezado-juego">
+        <h2 class="titulo-pequeno">Memory <span>Quest</span></h2>
 
-        <form id="formEstudiante" novalidate>
-          <div class="campo">
-            <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" name="nombre"
-                   placeholder="Ej: Laura Gómez Ríos" autocomplete="off">
-            <small class="error" id="errorNombre"></small>
+        <div class="marcadores">
+          <div class="marcador">
+            <span class="marcador-etiqueta">👣 Movimientos</span>
+            <strong id="contador-movimientos" class="marcador-valor">0</strong>
           </div>
-
-          <div class="campo">
-            <label for="identificacion">Número de identificación (ficticio)</label>
-            <input type="text" id="identificacion" name="identificacion"
-                   placeholder="Ej: 1001234501" inputmode="numeric" autocomplete="off">
-            <small class="error" id="errorIdentificacion"></small>
+          <div class="marcador">
+            <span class="marcador-etiqueta">⏱ Tiempo</span>
+            <strong id="contador-tiempo" class="marcador-valor">00:00</strong>
           </div>
-
-          <div class="campo">
-            <label for="correo">Correo electrónico</label>
-            <input type="email" id="correo" name="correo"
-                   placeholder="Ej: laura.gomez@correo.com" autocomplete="off">
-            <small class="error" id="errorCorreo"></small>
+          <div class="marcador">
+            <span class="marcador-etiqueta">✅ Parejas</span>
+            <strong id="contador-parejas" class="marcador-valor">0 / 8</strong>
           </div>
-
-          <div class="campo">
-            <label for="programa">Programa académico</label>
-            <select id="programa" name="programa">
-              <option value="">Seleccione un programa</option>
-            </select>
-            <small class="error" id="errorPrograma"></small>
-          </div>
-
-          <div class="campo">
-            <label for="calificacion">Calificación (0.0 a 5.0)</label>
-            <input type="number" id="calificacion" name="calificacion"
-                   min="0" max="5" step="0.1" placeholder="Ej: 4.2">
-            <small class="error" id="errorCalificacion"></small>
-          </div>
-
-          <div class="acciones-formulario">
-            <button type="submit" class="btn btn--primario" id="btnGuardar">
-              Registrar estudiante
-            </button>
-            <button type="button" class="btn btn--secundario" id="btnCancelar" hidden>
-              Cancelar edición
-            </button>
-          </div>
-        </form>
-
-        <p class="mensaje" id="mensaje" role="status" aria-live="polite"></p>
-      </section>
-
-      <section class="panel" aria-labelledby="tituloListado">
-        <div class="panel__cabecera">
-          <h2 class="panel__titulo" id="tituloListado">Listado de estudiantes</h2>
-          <span class="contador" id="contadorResultados"></span>
         </div>
+      </header>
 
-        <div class="filtros">
-          <div class="campo">
-            <label for="buscarNombre">Buscar por nombre</label>
-            <input type="search" id="buscarNombre" placeholder="Escriba un nombre..."
-                   autocomplete="off">
-          </div>
-          <div class="campo">
-            <label for="filtroPrograma">Programa académico</label>
-            <select id="filtroPrograma">
-              <option value="todos">Todos los programas</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label for="filtroEstado">Estado académico</label>
-            <select id="filtroEstado">
-              <option value="todos">Todos los estados</option>
-              <option value="Aprobado">Aprobado</option>
-              <option value="Reprobado">Reprobado</option>
-            </select>
-          </div>
-          <button type="button" class="btn btn--secundario" id="btnLimpiarFiltros">
-            Limpiar filtros
-          </button>
-        </div>
+      <div id="tablero" class="tablero" aria-label="Tablero de tarjetas"></div>
 
-        <div class="tabla-contenedor">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Identificación</th>
-                <th>Nombre completo</th>
-                <th>Correo electrónico</th>
-                <th>Programa</th>
-                <th>Nota</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="cuerpoTabla"></tbody>
-          </table>
-        </div>
-      </section>
+      <p id="mensaje" class="mensaje" aria-live="polite">
+        Haz clic en una tarjeta para comenzar.
+      </p>
 
-    </div>
+      <div class="acciones">
+        <button id="btn-reiniciar" class="boton boton-secundario" type="button">
+          ↻ Reiniciar
+        </button>
+        <button id="btn-menu" class="boton boton-terciario" type="button">
+          ⌂ Menú
+        </button>
+      </div>
+    </section>
+
   </main>
 
-  <footer class="pie">
-    <p>Universidad de Caldas &middot; Programación Web Creativa II &middot; Taller 15</p>
-  </footer>
+  <!-- VENTANA DE VICTORIA -->
+  <div id="modal-victoria" class="modal oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-victoria">
+    <div class="modal-contenido">
+      <div class="trofeo" aria-hidden="true">🏆</div>
+      <h2 id="titulo-victoria" class="modal-titulo">¡Victoria!</h2>
+      <p class="modal-texto">Encontraste todas las parejas del tablero.</p>
+      <div id="estrellas" class="estrellas" aria-hidden="true">⭐⭐⭐</div>
+
+      <div class="resultados">
+        <div class="resultado">
+          <span>Movimientos</span>
+          <strong id="resultado-movimientos">0</strong>
+        </div>
+        <div class="resultado">
+          <span>Tiempo</span>
+          <strong id="resultado-tiempo">00:00</strong>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button id="btn-jugar-otra-vez" class="boton boton-principal" type="button">
+          ↻ Jugar de nuevo
+        </button>
+        <button id="btn-volver-inicio" class="boton boton-terciario" type="button">
+          ⌂ Inicio
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

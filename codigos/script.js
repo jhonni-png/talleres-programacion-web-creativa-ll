@@ -1,473 +1,313 @@
 "use strict";
 
 /* ==========================================================
-   TALLER 15 - SISTEMA DE GESTIÓN DE ESTUDIANTES
-   JavaScript ES6+: CRUD, validaciones, filtros y LocalStorage
+   1. DATOS DEL JUEGO
    ========================================================== */
 
-/* ---------- 1. Constantes y estado de la aplicación ---------- */
-const CLAVE_ALMACENAMIENTO = "taller15_estudiantes";
-const NOTA_MINIMA = 0;
-const NOTA_MAXIMA = 5;
-const NOTA_APROBACION = 3.0;
-
-const PROGRAMAS = [
-  "Ingeniería de Sistemas",
-  "Diseño Visual",
-  "Administración de Empresas",
-  "Contaduría Pública",
-  "Licenciatura en Educación"
+// Ocho elementos diferentes (símbolos Unicode) con su color
+const SIMBOLOS = [
+  { simbolo: "🚀", color: "#ff5c8a" },
+  { simbolo: "🌟", color: "#f5a623" },
+  { simbolo: "🎮", color: "#7c5cff" },
+  { simbolo: "🦊", color: "#ff7a2f" },
+  { simbolo: "🍕", color: "#e84545" },
+  { simbolo: "🎧", color: "#17b3b8" },
+  { simbolo: "🐙", color: "#b44cf0" },
+  { simbolo: "🏆", color: "#2bb673" }
 ];
 
-let estudiantes = [];
-let idEnEdicion = null;
-let temporizadorMensaje = null;
+const TOTAL_PAREJAS = SIMBOLOS.length;   // 8 parejas = 16 tarjetas
+const TIEMPO_ESPERA = 900;               // milisegundos antes de ocultar un error
 
-/* ---------- 2. Referencias a elementos del DOM ---------- */
-const formulario = document.getElementById("formEstudiante");
-const tituloFormulario = document.getElementById("tituloFormulario");
-const campoNombre = document.getElementById("nombre");
-const campoIdentificacion = document.getElementById("identificacion");
-const campoCorreo = document.getElementById("correo");
-const campoPrograma = document.getElementById("programa");
-const campoCalificacion = document.getElementById("calificacion");
-const botonGuardar = document.getElementById("btnGuardar");
-const botonCancelar = document.getElementById("btnCancelar");
+/* ==========================================================
+   2. REFERENCIAS AL DOM
+   ========================================================== */
+
+const pantallaInicio = document.getElementById("pantalla-inicio");
+const pantallaJuego = document.getElementById("pantalla-juego");
+const tablero = document.getElementById("tablero");
 const mensaje = document.getElementById("mensaje");
+const contadorMovimientos = document.getElementById("contador-movimientos");
+const contadorTiempo = document.getElementById("contador-tiempo");
+const contadorParejas = document.getElementById("contador-parejas");
+const modalVictoria = document.getElementById("modal-victoria");
+const resultadoMovimientos = document.getElementById("resultado-movimientos");
+const resultadoTiempo = document.getElementById("resultado-tiempo");
+const estrellas = document.getElementById("estrellas");
 
-const errorNombre = document.getElementById("errorNombre");
-const errorIdentificacion = document.getElementById("errorIdentificacion");
-const errorCorreo = document.getElementById("errorCorreo");
-const errorPrograma = document.getElementById("errorPrograma");
-const errorCalificacion = document.getElementById("errorCalificacion");
+const btnIniciar = document.getElementById("btn-iniciar");
+const btnReiniciar = document.getElementById("btn-reiniciar");
+const btnMenu = document.getElementById("btn-menu");
+const btnJugarOtraVez = document.getElementById("btn-jugar-otra-vez");
+const btnVolverInicio = document.getElementById("btn-volver-inicio");
 
-const buscarNombre = document.getElementById("buscarNombre");
-const filtroPrograma = document.getElementById("filtroPrograma");
-const filtroEstado = document.getElementById("filtroEstado");
-const botonLimpiarFiltros = document.getElementById("btnLimpiarFiltros");
-const cuerpoTabla = document.getElementById("cuerpoTabla");
-const contadorResultados = document.getElementById("contadorResultados");
+/* ==========================================================
+   3. ESTADO DEL JUEGO
+   ========================================================== */
 
-const indTotal = document.getElementById("indTotal");
-const indPromedio = document.getElementById("indPromedio");
-const indAprobados = document.getElementById("indAprobados");
-const indReprobados = document.getElementById("indReprobados");
-const fechaActual = document.getElementById("fechaActual");
+const estado = {
+  primera: null,          // primera tarjeta seleccionada
+  segunda: null,          // segunda tarjeta seleccionada
+  bloqueado: false,       // impide seleccionar más de dos tarjetas
+  movimientos: 0,
+  parejas: 0,
+  segundos: 0,
+  juegoIniciado: false,   // se activa con el primer clic
+  temporizador: null,     // identificador de setInterval
+  esperaError: null,      // identificador de setTimeout (pareja incorrecta)
+  esperaVictoria: null    // identificador de setTimeout (ventana de victoria)
+};
 
-/* ---------- 3. Persistencia con LocalStorage ---------- */
-function cargarEstudiantes() {
-  try {
-    const datos = localStorage.getItem(CLAVE_ALMACENAMIENTO);
-    const lista = datos ? JSON.parse(datos) : [];
-    return Array.isArray(lista) ? lista : [];
-  } catch (error) {
-    console.error("No fue posible leer LocalStorage:", error);
-    return [];
+/* ==========================================================
+   4. FUNCIONES AUXILIARES
+   ========================================================== */
+
+// Mezcla un arreglo con el algoritmo Fisher-Yates y devuelve una copia
+function mezclar(arreglo) {
+  const copia = [...arreglo];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
   }
+  return copia;
 }
 
-function guardarEstudiantes() {
-  try {
-    localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(estudiantes));
-  } catch (error) {
-    console.error("No fue posible guardar en LocalStorage:", error);
-    mostrarMensaje("No fue posible guardar los datos en el navegador.", "error");
-  }
+// Convierte segundos a formato mm:ss
+function formatearTiempo(totalSegundos) {
+  const minutos = String(Math.floor(totalSegundos / 60)).padStart(2, "0");
+  const segundos = String(totalSegundos % 60).padStart(2, "0");
+  return `${minutos}:${segundos}`;
 }
 
-/* ---------- 4. Funciones de apoyo ---------- */
-function generarId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-
-function normalizarTexto(texto) {
-  return texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-function obtenerEstado(nota) {
-  return nota >= NOTA_APROBACION ? "Aprobado" : "Reprobado";
-}
-
-function calcularPromedio(lista) {
-  if (lista.length === 0) {
-    return 0;
-  }
-  const suma = lista.reduce((acumulado, estudiante) => acumulado + estudiante.nota, 0);
-  return suma / lista.length;
-}
-
-function mostrarMensaje(texto, tipo) {
-  clearTimeout(temporizadorMensaje);
+function mostrarMensaje(texto) {
   mensaje.textContent = texto;
-  mensaje.className = "mensaje mensaje--" + tipo;
-  temporizadorMensaje = setTimeout(() => {
-    mensaje.textContent = "";
-    mensaje.className = "mensaje";
-  }, 4000);
 }
 
-/* ---------- 5. Indicadores del panel principal ---------- */
-function actualizarIndicadores() {
-  const total = estudiantes.length;
-  const aprobados = estudiantes.filter((e) => obtenerEstado(e.nota) === "Aprobado").length;
-  const reprobados = total - aprobados;
-
-  indTotal.textContent = total;
-  indPromedio.textContent = calcularPromedio(estudiantes).toFixed(2);
-  indAprobados.textContent = aprobados;
-  indReprobados.textContent = reprobados;
+function actualizarMarcadores() {
+  contadorMovimientos.textContent = estado.movimientos;
+  contadorTiempo.textContent = formatearTiempo(estado.segundos);
+  contadorParejas.textContent = `${estado.parejas} / ${TOTAL_PAREJAS}`;
 }
 
-/* ---------- 6. Filtros y tabla ---------- */
-function obtenerFiltrados() {
-  const texto = normalizarTexto(buscarNombre.value.trim());
-  const programa = filtroPrograma.value;
-  const estado = filtroEstado.value;
+/* ==========================================================
+   5. TEMPORIZADOR
+   ========================================================== */
 
-  return estudiantes.filter((e) => {
-    const coincideNombre = normalizarTexto(e.nombre).includes(texto);
-    const coincidePrograma = programa === "todos" || e.programa === programa;
-    const coincideEstado = estado === "todos" || obtenerEstado(e.nota) === estado;
-    return coincideNombre && coincidePrograma && coincideEstado;
+function iniciarTemporizador() {
+  estado.juegoIniciado = true;
+  estado.temporizador = setInterval(() => {
+    estado.segundos++;
+    contadorTiempo.textContent = formatearTiempo(estado.segundos);
+  }, 1000);
+}
+
+function detenerTemporizador() {
+  clearInterval(estado.temporizador);
+  estado.temporizador = null;
+}
+
+/* ==========================================================
+   6. CREACIÓN DEL TABLERO
+   ========================================================== */
+
+function crearBaraja() {
+  // Cada símbolo se duplica para formar las parejas
+  const duplicadas = [...SIMBOLOS, ...SIMBOLOS];
+  return mezclar(duplicadas);
+}
+
+function crearTarjeta(datos, indice) {
+  const tarjeta = document.createElement("button");
+  tarjeta.type = "button";
+  tarjeta.className = "tarjeta";
+  tarjeta.dataset.simbolo = datos.simbolo;
+  tarjeta.style.setProperty("--color-carta", datos.color);
+  tarjeta.style.setProperty("--retraso", `${indice * 45}ms`);
+  tarjeta.setAttribute("aria-label", "Tarjeta oculta");
+
+  tarjeta.innerHTML =
+    '<span class="tarjeta-interior">' +
+      '<span class="cara cara-dorso">?</span>' +
+      `<span class="cara cara-frente">${datos.simbolo}</span>` +
+    "</span>";
+
+  tarjeta.addEventListener("click", () => seleccionarTarjeta(tarjeta));
+  return tarjeta;
+}
+
+function crearTablero() {
+  tablero.innerHTML = "";
+  crearBaraja().forEach((datos, indice) => {
+    tablero.appendChild(crearTarjeta(datos, indice));
   });
 }
 
-function crearCelda(texto, clase) {
-  const celda = document.createElement("td");
-  celda.textContent = texto;
-  if (clase) {
-    celda.className = clase;
+/* ==========================================================
+   7. LÓGICA DE SELECCIÓN Y COMPARACIÓN
+   ========================================================== */
+
+function voltearTarjeta(tarjeta) {
+  tarjeta.classList.add("volteada");
+  tarjeta.setAttribute("aria-label", `Tarjeta ${tarjeta.dataset.simbolo}`);
+}
+
+function ocultarTarjeta(tarjeta) {
+  tarjeta.classList.remove("volteada", "error");
+  tarjeta.setAttribute("aria-label", "Tarjeta oculta");
+}
+
+function seleccionarTarjeta(tarjeta) {
+  // No se permiten más de dos tarjetas al mismo tiempo
+  if (estado.bloqueado) return;
+
+  // Ignora tarjetas ya giradas o ya emparejadas
+  if (tarjeta.classList.contains("volteada")) return;
+
+  // El tiempo comienza con el primer clic
+  if (!estado.juegoIniciado) {
+    iniciarTemporizador();
   }
-  return celda;
-}
 
-function crearBoton(texto, accion, id, clase) {
-  const boton = document.createElement("button");
-  boton.type = "button";
-  boton.textContent = texto;
-  boton.className = "btn btn--mini " + clase;
-  boton.dataset.accion = accion;
-  boton.dataset.id = id;
-  return boton;
-}
+  voltearTarjeta(tarjeta);
 
-function renderizarTabla() {
-  const lista = obtenerFiltrados();
-  cuerpoTabla.textContent = "";
-  contadorResultados.textContent =
-    "Mostrando " + lista.length + " de " + estudiantes.length + " estudiantes";
-
-  if (lista.length === 0) {
-    const fila = document.createElement("tr");
-    const celda = crearCelda(
-      estudiantes.length === 0
-        ? "Aún no hay estudiantes registrados."
-        : "Ningún estudiante coincide con los filtros aplicados.",
-      "vacio"
-    );
-    celda.colSpan = 8;
-    fila.appendChild(celda);
-    cuerpoTabla.appendChild(fila);
+  // Primera tarjeta de la jugada
+  if (estado.primera === null) {
+    estado.primera = tarjeta;
+    mostrarMensaje("Ahora busca su pareja.");
     return;
   }
 
-  lista.forEach((estudiante, indice) => {
-    const fila = document.createElement("tr");
-    const estado = obtenerEstado(estudiante.nota);
-
-    fila.appendChild(crearCelda(indice + 1));
-    fila.appendChild(crearCelda(estudiante.identificacion));
-    fila.appendChild(crearCelda(estudiante.nombre));
-    fila.appendChild(crearCelda(estudiante.correo));
-    fila.appendChild(crearCelda(estudiante.programa));
-    fila.appendChild(crearCelda(estudiante.nota.toFixed(1), "nota"));
-
-    const celdaEstado = document.createElement("td");
-    const etiqueta = document.createElement("span");
-    etiqueta.textContent = estado;
-    etiqueta.className = "etiqueta etiqueta--" + estado.toLowerCase();
-    celdaEstado.appendChild(etiqueta);
-    fila.appendChild(celdaEstado);
-
-    const celdaAcciones = document.createElement("td");
-    const contenedorBotones = document.createElement("div");
-    contenedorBotones.className = "acciones-fila";
-    contenedorBotones.appendChild(
-      crearBoton("Editar", "editar", estudiante.id, "btn--editar")
-    );
-    contenedorBotones.appendChild(
-      crearBoton("Eliminar", "eliminar", estudiante.id, "btn--eliminar")
-    );
-    celdaAcciones.appendChild(contenedorBotones);
-    fila.appendChild(celdaAcciones);
-
-    cuerpoTabla.appendChild(fila);
-  });
+  // Segunda tarjeta de la jugada
+  estado.segunda = tarjeta;
+  estado.bloqueado = true;
+  estado.movimientos++;
+  actualizarMarcadores();
+  compararTarjetas();
 }
 
-function actualizarPanel() {
-  actualizarIndicadores();
-  renderizarTabla();
-}
+function compararTarjetas() {
+  const coinciden =
+    estado.primera.dataset.simbolo === estado.segunda.dataset.simbolo;
 
-function poblarProgramas() {
-  PROGRAMAS.forEach((programa) => {
-    campoPrograma.appendChild(new Option(programa, programa));
-    filtroPrograma.appendChild(new Option(programa, programa));
-  });
-}
-
-/* ---------- 7. Validaciones ---------- */
-function mostrarError(campo, etiquetaError, texto) {
-  campo.classList.add("invalido");
-  etiquetaError.textContent = texto;
-}
-
-function limpiarErrores() {
-  const pares = [
-    [campoNombre, errorNombre],
-    [campoIdentificacion, errorIdentificacion],
-    [campoCorreo, errorCorreo],
-    [campoPrograma, errorPrograma],
-    [campoCalificacion, errorCalificacion]
-  ];
-  pares.forEach(([campo, etiquetaError]) => {
-    campo.classList.remove("invalido");
-    etiquetaError.textContent = "";
-  });
-}
-
-function validarFormulario() {
-  limpiarErrores();
-  let valido = true;
-
-  const nombre = campoNombre.value.trim().replace(/\s+/g, " ");
-  const identificacion = campoIdentificacion.value.trim();
-  const correo = campoCorreo.value.trim().toLowerCase();
-  const programa = campoPrograma.value;
-  const textoNota = campoCalificacion.value.trim().replace(",", ".");
-
-  // Nombre completo
-  if (nombre === "") {
-    mostrarError(campoNombre, errorNombre, "El nombre completo es obligatorio.");
-    valido = false;
-  } else if (nombre.length < 3) {
-    mostrarError(campoNombre, errorNombre, "El nombre debe tener al menos 3 caracteres.");
-    valido = false;
-  } else if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/.test(nombre)) {
-    mostrarError(campoNombre, errorNombre, "El nombre solo puede contener letras.");
-    valido = false;
-  }
-
-  // Identificación (obligatoria, numérica y sin duplicados)
-  if (identificacion === "") {
-    mostrarError(
-      campoIdentificacion,
-      errorIdentificacion,
-      "La identificación es obligatoria."
-    );
-    valido = false;
-  } else if (!/^\d{5,12}$/.test(identificacion)) {
-    mostrarError(
-      campoIdentificacion,
-      errorIdentificacion,
-      "Use solo números (5 a 12 dígitos)."
-    );
-    valido = false;
-  } else if (
-    estudiantes.some((e) => e.identificacion === identificacion && e.id !== idEnEdicion)
-  ) {
-    mostrarError(
-      campoIdentificacion,
-      errorIdentificacion,
-      "Esta identificación ya está registrada."
-    );
-    valido = false;
-  }
-
-  // Correo electrónico
-  const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  if (correo === "") {
-    mostrarError(campoCorreo, errorCorreo, "El correo electrónico es obligatorio.");
-    valido = false;
-  } else if (!formatoCorreo.test(correo)) {
-    mostrarError(campoCorreo, errorCorreo, "Ingrese un correo válido (ej: a@dominio.com).");
-    valido = false;
-  }
-
-  // Programa académico
-  if (programa === "" || !PROGRAMAS.includes(programa)) {
-    mostrarError(campoPrograma, errorPrograma, "Seleccione un programa académico.");
-    valido = false;
-  }
-
-  // Calificación (0.0 a 5.0 con máximo un decimal)
-  const nota = Number(textoNota);
-  if (textoNota === "") {
-    mostrarError(campoCalificacion, errorCalificacion, "La calificación es obligatoria.");
-    valido = false;
-  } else if (Number.isNaN(nota)) {
-    mostrarError(campoCalificacion, errorCalificacion, "La calificación debe ser numérica.");
-    valido = false;
-  } else if (nota < NOTA_MINIMA || nota > NOTA_MAXIMA) {
-    mostrarError(
-      campoCalificacion,
-      errorCalificacion,
-      "La calificación debe estar entre 0.0 y 5.0."
-    );
-    valido = false;
-  } else if (Math.abs(nota * 10 - Math.round(nota * 10)) > 1e-9) {
-    mostrarError(campoCalificacion, errorCalificacion, "Use máximo un decimal (ej: 3.5).");
-    valido = false;
-  }
-
-  if (!valido) {
-    return null;
-  }
-  return { nombre, identificacion, correo, programa, nota: Math.round(nota * 10) / 10 };
-}
-
-/* ---------- 8. Operaciones CRUD ---------- */
-function limpiarFormulario() {
-  formulario.reset();
-  limpiarErrores();
-  idEnEdicion = null;
-  tituloFormulario.textContent = "Registrar estudiante";
-  botonGuardar.textContent = "Registrar estudiante";
-  botonCancelar.hidden = true;
-}
-
-function manejarEnvio(evento) {
-  evento.preventDefault();
-  const datos = validarFormulario();
-
-  if (datos === null) {
-    mostrarMensaje("Revise los campos marcados en rojo.", "error");
-    return;
-  }
-
-  if (idEnEdicion !== null) {
-    const posicion = estudiantes.findIndex((e) => e.id === idEnEdicion);
-    if (posicion !== -1) {
-      estudiantes[posicion] = { ...estudiantes[posicion], ...datos };
-    }
-    mostrarMensaje("Estudiante actualizado correctamente.", "exito");
+  if (coinciden) {
+    marcarPareja();
   } else {
-    estudiantes.push({ id: generarId(), ...datos });
-    mostrarMensaje("Estudiante registrado correctamente.", "exito");
+    ocultarPareja();
   }
-
-  guardarEstudiantes();
-  limpiarFormulario();
-  actualizarPanel();
 }
 
-function editarEstudiante(id) {
-  const estudiante = estudiantes.find((e) => e.id === id);
-  if (!estudiante) {
-    return;
-  }
-
-  limpiarErrores();
-  idEnEdicion = id;
-  campoNombre.value = estudiante.nombre;
-  campoIdentificacion.value = estudiante.identificacion;
-  campoCorreo.value = estudiante.correo;
-  campoPrograma.value = estudiante.programa;
-  campoCalificacion.value = estudiante.nota;
-
-  tituloFormulario.textContent = "Editar estudiante";
-  botonGuardar.textContent = "Guardar cambios";
-  botonCancelar.hidden = false;
-
-  formulario.scrollIntoView({ behavior: "smooth", block: "center" });
-  campoNombre.focus();
-}
-
-function eliminarEstudiante(id) {
-  const estudiante = estudiantes.find((e) => e.id === id);
-  if (!estudiante) {
-    return;
-  }
-
-  const confirmado = window.confirm("¿Desea eliminar a " + estudiante.nombre + "?");
-  if (!confirmado) {
-    return;
-  }
-
-  estudiantes = estudiantes.filter((e) => e.id !== id);
-  if (idEnEdicion === id) {
-    limpiarFormulario();
-  }
-
-  guardarEstudiantes();
-  actualizarPanel();
-  mostrarMensaje("Estudiante eliminado correctamente.", "exito");
-}
-
-/* ---------- 9. Eventos ---------- */
-function limpiarFiltros() {
-  buscarNombre.value = "";
-  filtroPrograma.value = "todos";
-  filtroEstado.value = "todos";
-  renderizarTabla();
-}
-
-function registrarEventos() {
-  formulario.addEventListener("submit", manejarEnvio);
-  botonCancelar.addEventListener("click", limpiarFormulario);
-
-  buscarNombre.addEventListener("input", renderizarTabla);
-  filtroPrograma.addEventListener("change", renderizarTabla);
-  filtroEstado.addEventListener("change", renderizarTabla);
-  botonLimpiarFiltros.addEventListener("click", limpiarFiltros);
-
-  // Delegación de eventos: un solo "click" para todos los botones de la tabla
-  cuerpoTabla.addEventListener("click", (evento) => {
-    const boton = evento.target.closest("button[data-accion]");
-    if (!boton) {
-      return;
-    }
-    if (boton.dataset.accion === "editar") {
-      editarEstudiante(boton.dataset.id);
-    } else if (boton.dataset.accion === "eliminar") {
-      eliminarEstudiante(boton.dataset.id);
-    }
+function marcarPareja() {
+  [estado.primera, estado.segunda].forEach((tarjeta) => {
+    tarjeta.classList.add("encontrada");
+    tarjeta.disabled = true;
   });
 
-  // Al escribir en un campo se quita su mensaje de error
-  [
-    [campoNombre, errorNombre],
-    [campoIdentificacion, errorIdentificacion],
-    [campoCorreo, errorCorreo],
-    [campoPrograma, errorPrograma],
-    [campoCalificacion, errorCalificacion]
-  ].forEach(([campo, etiquetaError]) => {
-    const quitarError = () => {
-      campo.classList.remove("invalido");
-      etiquetaError.textContent = "";
-    };
-    campo.addEventListener("input", quitarError);
-    campo.addEventListener("change", quitarError);
-  });
+  estado.parejas++;
+  limpiarSeleccion();
+  actualizarMarcadores();
+
+  if (estado.parejas === TOTAL_PAREJAS) {
+    ganarJuego();
+  } else {
+    mostrarMensaje("¡Pareja encontrada! Sigue así.");
+  }
 }
 
-/* ---------- 10. Inicio de la aplicación ---------- */
-function iniciarAplicacion() {
-  fechaActual.textContent = new Date().toLocaleDateString("es-CO", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
+function ocultarPareja() {
+  const a = estado.primera;
+  const b = estado.segunda;
 
-  estudiantes = cargarEstudiantes();
-  poblarProgramas();
-  registrarEventos();
-  actualizarPanel();
+  a.classList.add("error");
+  b.classList.add("error");
+  mostrarMensaje("No coinciden. Memoriza su posición.");
+
+  estado.esperaError = setTimeout(() => {
+    ocultarTarjeta(a);
+    ocultarTarjeta(b);
+    limpiarSeleccion();
+    estado.esperaError = null;
+  }, TIEMPO_ESPERA);
 }
 
-document.addEventListener("DOMContentLoaded", iniciarAplicacion);
+function limpiarSeleccion() {
+  estado.primera = null;
+  estado.segunda = null;
+  estado.bloqueado = false;
+}
+
+/* ==========================================================
+   8. VICTORIA
+   ========================================================== */
+
+function calcularEstrellas(movimientos) {
+  if (movimientos <= 12) return "⭐⭐⭐";
+  if (movimientos <= 18) return "⭐⭐";
+  return "⭐";
+}
+
+function ganarJuego() {
+  detenerTemporizador();
+  estado.bloqueado = true;
+  mostrarMensaje("¡Completaste el tablero!");
+
+  estado.esperaVictoria = setTimeout(() => {
+    resultadoMovimientos.textContent = estado.movimientos;
+    resultadoTiempo.textContent = formatearTiempo(estado.segundos);
+    estrellas.textContent = calcularEstrellas(estado.movimientos);
+    modalVictoria.classList.remove("oculto");
+    estado.esperaVictoria = null;
+  }, 700);
+}
+
+/* ==========================================================
+   9. INICIO, REINICIO Y MENÚ
+   ========================================================== */
+
+// Cancela temporizadores y esperas pendientes
+function detenerTodo() {
+  detenerTemporizador();
+  clearTimeout(estado.esperaError);
+  clearTimeout(estado.esperaVictoria);
+  estado.esperaError = null;
+  estado.esperaVictoria = null;
+}
+
+function reiniciarJuego() {
+  detenerTodo();
+
+  estado.primera = null;
+  estado.segunda = null;
+  estado.bloqueado = false;
+  estado.movimientos = 0;
+  estado.parejas = 0;
+  estado.segundos = 0;
+  estado.juegoIniciado = false;
+
+  modalVictoria.classList.add("oculto");
+  crearTablero();
+  actualizarMarcadores();
+  mostrarMensaje("Haz clic en una tarjeta para comenzar.");
+}
+
+function iniciarJuego() {
+  pantallaInicio.classList.add("oculto");
+  pantallaJuego.classList.remove("oculto");
+  reiniciarJuego();
+}
+
+function volverAlMenu() {
+  detenerTodo();
+  modalVictoria.classList.add("oculto");
+  pantallaJuego.classList.add("oculto");
+  pantallaInicio.classList.remove("oculto");
+}
+
+/* ==========================================================
+   10. EVENTOS
+   ========================================================== */
+
+btnIniciar.addEventListener("click", iniciarJuego);
+btnReiniciar.addEventListener("click", reiniciarJuego);
+btnMenu.addEventListener("click", volverAlMenu);
+btnJugarOtraVez.addEventListener("click", reiniciarJuego);
+btnVolverInicio.addEventListener("click", volverAlMenu);
