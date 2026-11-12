@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Taller 11 - Sistema de Evaluaciones Interactivas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-icon" aria-hidden="true">&lt;/&gt;</span>
+                <div>
+                    <p class="brand-title">Programación Web Creativa II</p>
+                    <p class="brand-subtitle">Universidad de Caldas</p>
+                </div>
+            </div>
+            <span class="header-tag">Taller 11</span>
+        </header>
+
+        <main>
+
+            <!-- PANTALLA 1: BIENVENIDA -->
+            <section id="welcome-screen" class="screen">
+                <div class="card welcome-card">
+                    <div class="welcome-icon" aria-hidden="true">🎓</div>
+                    <h1>Sistema de Evaluaciones Interactivas</h1>
+                    <p class="lead">
+                        Pon a prueba tus conocimientos sobre los fundamentos de la
+                        programación web: HTML, CSS y JavaScript.
+                    </p>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong id="info-total">0</strong>
+                            <span>preguntas</span>
+                        </div>
+                        <div class="info-item">
+                            <strong id="info-time">0 min</strong>
+                            <span>de tiempo total</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>4</strong>
+                            <span>opciones por pregunta</span>
+                        </div>
+                    </div>
+
+                    <ul class="rules">
+                        <li>Verás una pregunta a la vez.</li>
+                        <li>Debes seleccionar una respuesta para poder continuar.</li>
+                        <li>Al responder, verás de inmediato si acertaste o no.</li>
+                        <li>Si el tiempo termina, la evaluación se cierra sola.</li>
+                    </ul>
+
+                    <button id="start-btn" class="btn btn-primary btn-large"
+                            type="button">
+                        Iniciar evaluación
+                    </button>
+                </div>
+            </section>
+
+            <!-- PANTALLA 2: EVALUACIÓN -->
+            <section id="quiz-screen" class="screen hidden">
+                <div class="quiz-top">
+                    <div class="progress-info">
+                        <span id="progress-text" class="progress-text">
+                            Pregunta 1 de 1
+                        </span>
+                        <span id="live-score" class="live-score">Aciertos: 0</span>
+                    </div>
+                    <div id="timer" class="timer" aria-live="off">
+                        <span aria-hidden="true">⏱</span>
+                        <span id="timer-text">00:00</span>
+                    </div>
+                </div>
+
+                <div class="progress-bar" role="progressbar"
+                     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+
+                <article class="card question-card">
+                    <span id="question-badge" class="question-badge">Pregunta 1</span>
+                    <h2 id="question-text" class="question-text"></h2>
+
+                    <div id="options" class="options"></div>
+
+                    <div id="feedback" class="feedback hidden" role="status"></div>
+                    <p id="validation-message" class="validation hidden"
+                       role="alert">
+                        Debes seleccionar una respuesta antes de continuar.
+                    </p>
+
+                    <div class="actions">
+                        <button id="next-btn" class="btn btn-primary"
+                                type="button">Siguiente</button>
+                    </div>
+                </article>
+            </section>
+
+            <!-- PANTALLA 3: RESULTADOS -->
+            <section id="results-screen" class="screen hidden">
+                <div class="card results-card">
+                    <div id="score-ring" class="score-ring">
+                        <div class="score-ring-inner">
+                            <span id="score-percent" class="score-percent">0%</span>
+                            <small>de aciertos</small>
+                        </div>
+                    </div>
+
+                    <h2 id="result-title" class="result-title"></h2>
+                    <p id="result-message" class="result-message"></p>
+
+                    <div class="stats-grid">
+                        <div class="stat stat-correct">
+                            <strong id="stat-correct">0</strong>
+                            <span>Correctas</span>
+                        </div>
+                        <div class="stat stat-wrong">
+                            <strong id="stat-wrong">0</strong>
+                            <span>Incorrectas</span>
+                        </div>
+                        <div class="stat stat-blank">
+                            <strong id="stat-blank">0</strong>
+                            <span>Sin responder</span>
+                        </div>
+                        <div class="stat stat-time">
+                            <strong id="stat-time">00:00</strong>
+                            <span>Tiempo usado</span>
+                        </div>
+                    </div>
+
+                    <p class="grade-line">
+                        Calificación final: <strong id="grade-value">0.0</strong> / 5.0
+                    </p>
+
+                    <button id="restart-btn" class="btn btn-primary btn-large"
+                            type="button">
+                        Volver a comenzar
+                    </button>
+                </div>
+
+                <div class="card review-card">
+                    <h3>Revisión de respuestas</h3>
+                    <div id="review-list" class="review-list"></div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="app-footer">
+            <p>Docente: Andrés Felipe Osorio Quintero · Universidad de Caldas</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
