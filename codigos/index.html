@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Taller 12: Carrito de compras interactivo - Programación Web Creativa II">
+  <title>TecnoMarket | Tienda Virtual</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ENCABEZADO DE LA TIENDA -->
+  <header class="encabezado">
+    <div class="contenedor encabezado__interior">
+      <a class="logo" href="#inicio" aria-label="TecnoMarket, ir al inicio">
+        <span class="logo__icono" aria-hidden="true">T</span>
+        <span class="logo__texto">Tecno<span>Market</span></span>
+      </a>
+
+      <nav class="menu" aria-label="Navegación principal">
+        <a href="#inicio">Inicio</a>
+        <a href="#catalogo">Catálogo</a>
+        <a href="#beneficios">Beneficios</a>
+      </nav>
+
+      <button id="btn-abrir-carrito"
+        class="btn-carrito"
+        type="button"
+        aria-label="Abrir carrito de compras">
+        <span class="btn-carrito__icono" aria-hidden="true">🛒</span>
+        <span class="btn-carrito__texto">Mi carrito</span>
+        <span id="contador-carrito" class="contador" aria-live="polite">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- PRESENTACIÓN -->
+  <section id="inicio" class="hero">
+    <div class="contenedor hero__interior">
+      <div class="hero__texto">
+        <p class="hero__etiqueta">Ofertas de temporada</p>
+        <h1>Tecnología que te acompaña todos los días</h1>
+        <p class="hero__descripcion">
+          Explora nuestro catálogo, agrega tus productos favoritos al carrito
+          y calcula el valor de tu compra con IVA incluido.
+        </p>
+        <a class="btn btn--naranja" href="#catalogo">Ver productos</a>
+      </div>
+      <div class="hero__decoracion" aria-hidden="true">
+        <div class="hero__circulo hero__circulo--grande">🎧</div>
+        <div class="hero__circulo hero__circulo--mediano">⌚</div>
+        <div class="hero__circulo hero__circulo--pequeno">🔋</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFICIOS -->
+  <section id="beneficios" class="beneficios">
+    <div class="contenedor beneficios__grid">
+      <article class="beneficio">
+        <span class="beneficio__icono" aria-hidden="true">🚚</span>
+        <div>
+          <h3>Envío rápido</h3>
+          <p>Entrega simulada en 24 a 48 horas.</p>
+        </div>
+      </article>
+      <article class="beneficio">
+        <span class="beneficio__icono" aria-hidden="true">🔒</span>
+        <div>
+          <h3>Compra segura</h3>
+          <p>Tus datos nunca salen de tu navegador.</p>
+        </div>
+      </article>
+      <article class="beneficio">
+        <span class="beneficio__icono" aria-hidden="true">🛡️</span>
+        <div>
+          <h3>Garantía</h3>
+          <p>Todos los productos incluyen garantía.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO DE PRODUCTOS -->
+  <main id="catalogo" class="contenedor catalogo">
+    <div class="catalogo__encabezado">
+      <h2>Catálogo de productos</h2>
+      <p>Precios en pesos colombianos (COP). El IVA del 19% se calcula en el carrito.</p>
+    </div>
+    <div id="lista-productos" class="grid-productos"></div>
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="pie">
+    <div class="contenedor">
+      <p><strong>TecnoMarket</strong> · Tienda virtual simulada</p>
+      <p>Universidad de Caldas · Programación Web Creativa II · Taller 12</p>
+    </div>
+  </footer>
+
+  <!-- FONDO OSCURO DETRÁS DEL CARRITO -->
+  <div id="fondo-oscuro" class="fondo-oscuro"></div>
+
+  <!-- PANEL DEL CARRITO -->
+  <aside id="panel-carrito"
+    class="panel-carrito"
+    aria-label="Carrito de compras"
+    aria-hidden="true">
+    <div class="panel-carrito__encabezado">
+      <h2>🛒 Tu carrito</h2>
+      <button id="btn-cerrar-carrito"
+        class="btn-cerrar"
+        type="button"
+        aria-label="Cerrar carrito">✕</button>
+    </div>
+
+    <div class="panel-carrito__cuerpo">
+      <div id="carrito-vacio" class="carrito-vacio">
+        <span class="carrito-vacio__icono" aria-hidden="true">🛍️</span>
+        <h3>Tu carrito está vacío</h3>
+        <p>Agrega productos desde el catálogo para comenzar tu compra.</p>
+        <button id="btn-seguir-comprando"
+          class="btn btn--azul"
+          type="button">Explorar catálogo</button>
+      </div>
+
+      <ul id="carrito-items" class="carrito-items"></ul>
+    </div>
+
+    <div id="carrito-resumen" class="carrito-resumen">
+      <dl class="resumen">
+        <div class="resumen__fila">
+          <dt>Subtotal</dt>
+          <dd id="valor-subtotal">$0</dd>
+        </div>
+        <div class="resumen__fila">
+          <dt>IVA (19%)</dt>
+          <dd id="valor-iva">$0</dd>
+        </div>
+        <div class="resumen__fila resumen__fila--total">
+          <dt>Total a pagar</dt>
+          <dd id="valor-total">$0</dd>
+        </div>
+      </dl>
+      <button id="btn-finalizar"
+        class="btn btn--naranja btn--ancho"
+        type="button">Finalizar compra</button>
+      <button id="btn-vaciar"
+        class="btn btn--borde btn--ancho"
+        type="button">Vaciar carrito</button>
+    </div>
+  </aside>
+
+  <!-- CONFIRMACIÓN DE COMPRA SIMULADA -->
+  <div id="modal-compra"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-titulo"
+    aria-hidden="true">
+    <div class="modal__caja">
+      <div class="modal__icono" aria-hidden="true">✓</div>
+      <h2 id="modal-titulo">¡Compra realizada con éxito!</h2>
+      <p class="modal__subtitulo"
+        >Gracias por confiar en TecnoMarket. Esta es una compra simulada.</p>
+
+      <p class="modal__pedido">Pedido <strong id="modal-numero">#000000</strong></p>
+
+      <ul id="modal-detalle" class="modal__detalle"></ul>
+
+      <dl class="resumen resumen--modal">
+        <div class="resumen__fila">
+          <dt>Subtotal</dt>
+          <dd id="modal-subtotal">$0</dd>
+        </div>
+        <div class="resumen__fila">
+          <dt>IVA (19%)</dt>
+          <dd id="modal-iva">$0</dd>
+        </div>
+        <div class="resumen__fila resumen__fila--total">
+          <dt>Total pagado</dt>
+          <dd id="modal-total">$0</dd>
+        </div>
+      </dl>
+
+      <button id="btn-cerrar-modal"
+        class="btn btn--naranja btn--ancho"
+        type="button">Aceptar y seguir comprando</button>
+    </div>
+  </div>
+
+  <!-- NOTIFICACIÓN EMERGENTE -->
+  <div id="notificacion" class="notificacion" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
