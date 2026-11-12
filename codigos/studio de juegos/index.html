@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>La Aventura de Zipo | Videojuego de plataformas 2D</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="game-container">
+ 
+    <!-- Marcador del juego -->
+    <header class="hud">
+      <div class="hud-item">
+        <span class="hud-label">Puntos</span>
+        <span class="hud-value" id="hud-score">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Monedas</span>
+        <span class="hud-value" id="hud-coins">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Vidas</span>
+        <span class="hud-value hud-lives" id="hud-lives">3</span>
+      </div>
+    </header>
+ 
+    <!-- Zona de juego: canvas + pantallas superpuestas -->
+    <section class="game-wrap" id="game-wrap">
+      <canvas id="game-canvas" width="960" height="540"></canvas>
+ 
+      <div class="screen" id="screen-menu">
+        <h1>La Aventura de Zipo</h1>
+        <p class="subtitle">Ayuda a Zipo a cruzar el valle, recolectar monedas y llegar a la bandera.</p>
+        <ul class="instructions">
+          <li><strong>&larr; &rarr;</strong> Moverse</li>
+          <li><strong>Espacio / W</strong> Saltar</li>
+          <li><strong>Salta sobre los enemigos</strong> para derrotarlos</li>
+          <li><strong>R</strong> Reiniciar al terminar</li>
+        </ul>
+        <button class="btn" id="btn-start" type="button">Iniciar juego</button>
+      </div>
+ 
+      <div class="screen hidden" id="screen-win">
+        <h1 class="title-win">¡Victoria!</h1>
+        <p class="subtitle">Zipo llegó a la meta.</p>
+        <p class="final-score">Puntuación final: <span id="win-score">0</span></p>
+        <p class="final-score">Monedas: <span id="win-coins">0</span></p>
+        <button class="btn" id="btn-restart-win" type="button">Jugar de nuevo</button>
+      </div>
+ 
+      <div class="screen hidden" id="screen-over">
+        <h1 class="title-over">Game Over</h1>
+        <p class="subtitle">Zipo se quedó sin vidas.</p>
+        <p class="final-score">Puntuación: <span id="over-score">0</span></p>
+        <button class="btn" id="btn-restart-over" type="button">Reintentar</button>
+      </div>
+    </section>
+ 
+    <!-- Controles táctiles (solo visibles en móviles y pantallas pequeñas) -->
+    <section class="touch-controls" id="touch-controls">
+      <div class="dpad">
+        <button class="touch-btn" id="touch-left" type="button" aria-label="Izquierda">&#9664;</button>
+        <button class="touch-btn" id="touch-right" type="button" aria-label="Derecha">&#9654;</button>
+      </div>
+      <button class="touch-btn touch-jump" id="touch-jump" type="button" aria-label="Saltar">SALTAR</button>
+    </section>
+ 
+  </main>
+ 
+  <script src="script.js"></script>
+</body>
+</html>
