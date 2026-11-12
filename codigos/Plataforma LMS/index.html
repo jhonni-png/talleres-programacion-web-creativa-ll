@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Taller 19: Plataforma educativa LMS - Programación Web Creativa II - Universidad de Caldas">
+  <title>Aula Caldas LMS | Taller 19</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+  <div class="app" id="app">
+
+    <!-- ========== MENÚ LATERAL ========== -->
+    <aside class="sidebar" id="sidebar" aria-label="Menú principal">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">A</span>
+        <div class="brand-text">
+          <strong>Aula Caldas</strong>
+          <small>Plataforma LMS</small>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Navegación de la plataforma">
+        <button type="button" class="nav-btn active" data-action="nav" data-view="dashboard">
+          <span class="nav-icon" aria-hidden="true">🏠</span> Panel del estudiante
+        </button>
+        <button type="button" class="nav-btn" data-action="nav" data-view="catalog">
+          <span class="nav-icon" aria-hidden="true">📚</span> Catálogo de cursos
+        </button>
+        <button type="button" class="nav-btn" data-action="nav" data-view="learn">
+          <span class="nav-icon" aria-hidden="true">▶️</span> Aprendizaje
+        </button>
+        <button type="button" class="nav-btn" data-action="nav" data-view="quiz">
+          <span class="nav-icon" aria-hidden="true">📝</span> Evaluaciones
+        </button>
+        <button type="button" class="nav-btn" data-action="nav" data-view="history">
+          <span class="nav-icon" aria-hidden="true">🕒</span> Historial
+        </button>
+        <button type="button" class="nav-btn" data-action="nav" data-view="certificates">
+          <span class="nav-icon" aria-hidden="true">🎓</span> Certificados
+        </button>
+      </nav>
+
+      <div class="student-card" id="studentCard"></div>
+
+      <button type="button" class="btn btn-ghost btn-reset" data-action="reset">
+        Reiniciar datos de demostración
+      </button>
+    </aside>
+
+    <div class="overlay" id="overlay" data-action="close-sidebar"></div>
+
+    <!-- ========== CONTENIDO ========== -->
+    <div class="content">
+      <header class="topbar">
+        <button type="button" class="menu-toggle" data-action="toggle-sidebar" aria-label="Abrir o cerrar el menú">
+          <span></span><span></span><span></span>
+        </button>
+        <h1 id="pageTitle">Panel del estudiante</h1>
+        <div class="top-progress" id="topProgress" title="Progreso general"></div>
+      </header>
+
+      <main id="main" tabindex="-1">
+        <section id="view-dashboard" class="view" aria-labelledby="pageTitle"></section>
+        <section id="view-catalog" class="view" aria-labelledby="pageTitle" hidden></section>
+        <section id="view-learn" class="view" aria-labelledby="pageTitle" hidden></section>
+        <section id="view-quiz" class="view" aria-labelledby="pageTitle" hidden></section>
+        <section id="view-history" class="view" aria-labelledby="pageTitle" hidden></section>
+        <section id="view-certificates" class="view" aria-labelledby="pageTitle" hidden></section>
+      </main>
+
+      <footer class="footer">
+        <p>Universidad de Caldas · Programación Web Creativa II · Taller 19 · Docente: Andrés Felipe Osorio Quintero</p>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
