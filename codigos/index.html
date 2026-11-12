@@ -1,114 +1,231 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taller 13 - Tablero Kanban</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Analítica Empresarial | Taller 16</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- ENCABEZADO -->
-    <header class="encabezado">
-        <div class="encabezado-contenido">
-            <div>
-                <h1>Tablero Kanban</h1>
-                <p class="subtitulo">
-                    Gestión de proyectos · Programación Web Creativa II
-                    · Universidad de Caldas
-                </p>
-            </div>
-            <div class="resumen">
-                <span class="resumen-numero" id="total-tareas">0</span>
-                <span class="resumen-texto">Total de tareas</span>
-            </div>
+  <div class="app">
+ 
+    <!-- ========== MENÚ LATERAL ========== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-logo">N</span>
+        <div class="brand-text">
+          <strong>NexoAnalytics</strong>
+          <small>Business Intelligence</small>
         </div>
-    </header>
-
-    <main class="contenedor">
-
-        <!-- FORMULARIO PARA CREAR Y EDITAR TAREAS -->
-        <section class="panel-formulario" aria-labelledby="titulo-formulario">
-            <h2 id="titulo-formulario">Nueva tarea</h2>
-
-            <form id="form-tarea" novalidate>
-                <div class="campo">
-                    <label for="titulo">Título de la tarea *</label>
-                    <input type="text" id="titulo" maxlength="60"
-                           placeholder="Ejemplo: Diseñar el inicio"
-                           autocomplete="off">
-                </div>
-
-                <div class="campo">
-                    <label for="prioridad">Prioridad</label>
-                    <select id="prioridad">
-                        <option value="baja">Baja</option>
-                        <option value="media" selected>Media</option>
-                        <option value="alta">Alta</option>
-                    </select>
-                </div>
-
-                <div class="campo campo-ancho">
-                    <label for="descripcion">Descripción</label>
-                    <textarea id="descripcion" rows="3" maxlength="200"
-                              placeholder="Detalles de la tarea"></textarea>
-                </div>
-
-                <div class="acciones-formulario">
-                    <button type="submit" id="btn-guardar"
-                            class="boton boton-primario">
-                        Agregar tarea
-                    </button>
-                    <button type="button" id="btn-cancelar"
-                            class="boton boton-secundario" hidden>
-                        Cancelar edición
-                    </button>
-                    <button type="button" id="btn-vaciar"
-                            class="boton boton-suave">
-                        Vaciar tablero
-                    </button>
-                </div>
-            </form>
-
-            <p id="mensaje" class="mensaje" role="status" aria-live="polite"
-               hidden></p>
+      </div>
+ 
+      <p class="menu-title">Navegación</p>
+      <nav class="menu" aria-label="Menú principal">
+        <a class="menu-link active" href="#resumen">Resumen general</a>
+        <a class="menu-link" href="#graficos">Gráficos</a>
+        <a class="menu-link" href="#transacciones">Transacciones</a>
+        <a class="menu-link" href="#reportes">Reportes</a>
+      </nav>
+ 
+      <div class="sidebar-footer">
+        <strong>Taller 16</strong>
+        <small>Programación Web Creativa II</small>
+        <small>Universidad de Caldas</small>
+      </div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+ 
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <div class="main">
+ 
+      <header class="topbar">
+        <button class="btn-menu" id="btnMenu" type="button" aria-label="Abrir o cerrar el menú">Menú</button>
+        <div class="topbar-title">
+          <h1>Dashboard de Analítica Empresarial</h1>
+          <p id="fechaActual"></p>
+        </div>
+        <div class="topbar-user">
+          <span class="avatar">AD</span>
+          <div class="user-text">
+            <strong>Administrador</strong>
+            <small>Gerencia comercial</small>
+          </div>
+        </div>
+      </header>
+ 
+      <main class="content">
+ 
+        <!-- ===== RESUMEN GENERAL ===== -->
+        <section id="resumen" class="section">
+          <div class="section-head">
+            <div>
+              <h2>Resumen general</h2>
+              <p>Indicadores clave del año 2026 comparados con el año 2025.</p>
+            </div>
+            <div class="filters">
+              <label class="field">Mes
+                <select id="filtroMes"></select>
+              </label>
+              <label class="field">Categoría
+                <select id="filtroCategoria"></select>
+              </label>
+              <button id="btnReset" class="btn btn-outline" type="button">Restablecer filtros</button>
+              <button class="btn btn-primary js-exportar" type="button">Exportar CSV</button>
+            </div>
+          </div>
+ 
+          <div class="kpi-grid">
+            <article class="card kpi">
+              <div class="kpi-icon blue">$</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Total de ventas</span>
+                <strong class="kpi-value" id="kpiVentas">$ 0</strong>
+                <span class="delta" id="deltaVentas"></span>
+              </div>
+            </article>
+            <article class="card kpi">
+              <div class="kpi-icon cyan">C</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Número de clientes</span>
+                <strong class="kpi-value" id="kpiClientes">0</strong>
+                <span class="delta" id="deltaClientes"></span>
+              </div>
+            </article>
+            <article class="card kpi">
+              <div class="kpi-icon violet">P</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Número de pedidos</span>
+                <strong class="kpi-value" id="kpiPedidos">0</strong>
+                <span class="delta" id="deltaPedidos"></span>
+              </div>
+            </article>
+            <article class="card kpi">
+              <div class="kpi-icon green">%</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Crecimiento anual</span>
+                <strong class="kpi-value" id="kpiCrecimiento">0 %</strong>
+                <span class="delta" id="deltaCrecimiento"></span>
+              </div>
+            </article>
+          </div>
+ 
+          <h3 class="subtitle">Indicadores de comparación</h3>
+          <div class="compare-grid">
+            <article class="card compare">
+              <span class="kpi-label">Ticket promedio</span>
+              <strong class="compare-value" id="cmpTicket">$ 0</strong>
+              <span class="delta" id="deltaTicket"></span>
+            </article>
+            <article class="card compare">
+              <span class="kpi-label">Cumplimiento de la meta</span>
+              <strong class="compare-value" id="cmpMeta">0 %</strong>
+              <div class="progress" aria-hidden="true"><span id="barraMeta"></span></div>
+              <small class="muted" id="textoMeta"></small>
+            </article>
+            <article class="card compare">
+              <span class="kpi-label">Mejor mes</span>
+              <strong class="compare-value" id="cmpMes">-</strong>
+              <small class="muted" id="cmpMesValor"></small>
+            </article>
+            <article class="card compare">
+              <span class="kpi-label">Categoría líder</span>
+              <strong class="compare-value" id="cmpCategoria">-</strong>
+              <small class="muted" id="cmpCategoriaValor"></small>
+            </article>
+          </div>
         </section>
-
-        <!-- TABLERO CON LAS TRES COLUMNAS -->
-        <section class="tablero" aria-label="Tablero Kanban">
-
-            <article class="columna columna-pendiente" data-estado="pendiente">
-                <header class="columna-encabezado">
-                    <h2>Pendientes</h2>
-                    <span class="contador" id="contador-pendiente">0</span>
-                </header>
-                <div class="lista-tareas" id="lista-pendiente"></div>
+ 
+        <!-- ===== GRÁFICOS ===== -->
+        <section id="graficos" class="section">
+          <div class="section-head">
+            <div>
+              <h2>Análisis gráfico</h2>
+              <p>Los gráficos se dibujan con la API Canvas y se actualizan con los filtros.</p>
+            </div>
+          </div>
+ 
+          <div class="charts-grid">
+            <article class="card chart-card chart-bar">
+              <header class="chart-head">
+                <h3>Ventas por mes</h3>
+                <span class="chip">2026</span>
+              </header>
+              <div class="chart-wrap"><canvas id="graficoBarras" aria-label="Gráfico de barras de ventas por mes" role="img"></canvas></div>
             </article>
-
-            <article class="columna columna-proceso" data-estado="proceso">
-                <header class="columna-encabezado">
-                    <h2>En proceso</h2>
-                    <span class="contador" id="contador-proceso">0</span>
-                </header>
-                <div class="lista-tareas" id="lista-proceso"></div>
+ 
+            <article class="card chart-card chart-pie">
+              <header class="chart-head">
+                <h3>Ventas por categoría</h3>
+                <span class="chip">Distribución</span>
+              </header>
+              <div class="chart-wrap"><canvas id="graficoCircular" aria-label="Gráfico circular de ventas por categoría" role="img"></canvas></div>
+              <ul class="legend" id="leyendaCategorias"></ul>
             </article>
-
-            <article class="columna columna-completada" data-estado="completada">
-                <header class="columna-encabezado">
-                    <h2>Completadas</h2>
-                    <span class="contador" id="contador-completada">0</span>
-                </header>
-                <div class="lista-tareas" id="lista-completada"></div>
+ 
+            <article class="card chart-card chart-line">
+              <header class="chart-head">
+                <h3>Comparación de resultados: 2026 frente a 2025</h3>
+                <div class="legend-inline">
+                  <span class="dot dot-blue"></span>2026
+                  <span class="dot dot-gray"></span>2025
+                </div>
+              </header>
+              <div class="chart-wrap"><canvas id="graficoLineas" aria-label="Gráfico de líneas comparando 2026 y 2025" role="img"></canvas></div>
             </article>
-
+          </div>
         </section>
-    </main>
-
-    <footer class="pie">
-        Taller 13 · Programación Web Creativa II ·
-        Docente: Andrés Felipe Osorio Quintero
-    </footer>
-
-    <script src="script.js"></script>
+ 
+        <!-- ===== TRANSACCIONES ===== -->
+        <section id="transacciones" class="section">
+          <div class="section-head">
+            <div>
+              <h2>Transacciones</h2>
+              <p id="resumenTabla"></p>
+            </div>
+            <div class="filters">
+              <input type="search" id="buscador" class="search" placeholder="Buscar por cliente, producto o ID..." aria-label="Buscar registros">
+            </div>
+          </div>
+ 
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table id="tablaTransacciones">
+                <thead><tr id="encabezadoTabla"></tr></thead>
+                <tbody id="cuerpoTabla"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+ 
+        <!-- ===== REPORTES ===== -->
+        <section id="reportes" class="section">
+          <div class="section-head">
+            <div>
+              <h2>Reporte ejecutivo</h2>
+              <p>Resumen automático según los filtros que estén activos.</p>
+            </div>
+            <div class="filters">
+              <button id="btnImprimir" class="btn btn-outline" type="button">Imprimir reporte</button>
+              <button class="btn btn-primary js-exportar" type="button">Exportar CSV</button>
+            </div>
+          </div>
+ 
+          <article class="card report">
+            <h3 id="reporteTitulo"></h3>
+            <ul id="reporteLista"></ul>
+          </article>
+        </section>
+ 
+        <footer class="footer">
+          <p>Taller 16 · Dashboard de Analítica Empresarial · Programación Web Creativa II · Universidad de Caldas</p>
+          <p>Datos ficticios con fines académicos.</p>
+        </footer>
+      </main>
+    </div>
+  </div>
+ 
+  <div class="tooltip" id="tooltip" role="status"></div>
+ 
+  <script src="script.js" defer></script>
 </body>
 </html>
