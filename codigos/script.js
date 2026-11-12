@@ -1,492 +1,473 @@
-/* ==========================================================
-   TALLER 12 - CARRITO DE COMPRAS INTERACTIVO
-   Universidad de Caldas · Programación Web Creativa II
-   ========================================================== */
-
 "use strict";
 
-/* ---------- 1. CONSTANTES ---------- */
-const TASA_IVA = 0.19;
-const CLAVE_ALMACENAMIENTO = "taller12_carrito_tecnomarket";
+/* ==========================================================
+   TALLER 15 - SISTEMA DE GESTIÓN DE ESTUDIANTES
+   JavaScript ES6+: CRUD, validaciones, filtros y LocalStorage
+   ========================================================== */
 
-/* ---------- 2. CATÁLOGO DE PRODUCTOS (ARRAY DE OBJETOS) ---------- */
-const productos = [
-  {
-    id: 1,
-    nombre: "Audífonos Bluetooth Pro",
-    descripcion: "Cancelación de ruido, 30 horas de batería y micrófono integrado.",
-    precio: 189900,
-    categoria: "Audio",
-    icono: "🎧",
-    fondo: "linear-gradient(135deg, #ff9a3c, #ff6a00)"
-  },
-  {
-    id: 2,
-    nombre: "Smartwatch Fit Series",
-    descripcion: "Monitor de ritmo cardíaco, GPS y resistencia al agua.",
-    precio: 259900,
-    categoria: "Wearables",
-    icono: "⌚",
-    fondo: "linear-gradient(135deg, #3b82f6, #1e3a8a)"
-  },
-  {
-    id: 3,
-    nombre: "Teclado Mecánico RGB",
-    descripcion: "Switches rojos, iluminación personalizable y diseño compacto.",
-    precio: 229900,
-    categoria: "Periféricos",
-    icono: "⌨️",
-    fondo: "linear-gradient(135deg, #8b5cf6, #4c1d95)"
-  },
-  {
-    id: 4,
-    nombre: "Mouse Inalámbrico Ergo",
-    descripcion: "Diseño ergonómico, sensor de alta precisión y batería recargable.",
-    precio: 89900,
-    categoria: "Periféricos",
-    icono: "🖱️",
-    fondo: "linear-gradient(135deg, #14b8a6, #0f766e)"
-  },
-  {
-    id: 5,
-    nombre: "Monitor LED 24 pulgadas",
-    descripcion: "Resolución Full HD, 75 Hz y entradas HDMI y VGA.",
-    precio: 679900,
-    categoria: "Pantallas",
-    icono: "🖥️",
-    fondo: "linear-gradient(135deg, #0ea5e9, #0b2545)"
-  },
-  {
-    id: 6,
-    nombre: "Cámara Web Full HD",
-    descripcion: "Video a 1080p, enfoque automático y micrófono con reducción de ruido.",
-    precio: 149900,
-    categoria: "Video",
-    icono: "📷",
-    fondo: "linear-gradient(135deg, #f43f5e, #9f1239)"
-  },
-  {
-    id: 7,
-    nombre: "Parlante Portátil Splash",
-    descripcion: "Sonido de 360 grados, resistente al agua y 12 horas de reproducción.",
-    precio: 129900,
-    categoria: "Audio",
-    icono: "🔊",
-    fondo: "linear-gradient(135deg, #fbbf24, #d97706)"
-  },
-  {
-    id: 8,
-    nombre: "Power Bank 20.000 mAh",
-    descripcion: "Carga rápida, dos puertos USB y un puerto USB-C de alta potencia.",
-    precio: 119900,
-    categoria: "Energía",
-    icono: "🔋",
-    fondo: "linear-gradient(135deg, #22c55e, #166534)"
-  }
+/* ---------- 1. Constantes y estado de la aplicación ---------- */
+const CLAVE_ALMACENAMIENTO = "taller15_estudiantes";
+const NOTA_MINIMA = 0;
+const NOTA_MAXIMA = 5;
+const NOTA_APROBACION = 3.0;
+
+const PROGRAMAS = [
+  "Ingeniería de Sistemas",
+  "Diseño Visual",
+  "Administración de Empresas",
+  "Contaduría Pública",
+  "Licenciatura en Educación"
 ];
 
-/* ---------- 3. ESTADO DE LA APLICACIÓN ---------- */
-// Cada elemento del carrito tiene la forma: { id: 1, cantidad: 2 }
-let carrito = [];
-let temporizadorNotificacion = null;
+let estudiantes = [];
+let idEnEdicion = null;
+let temporizadorMensaje = null;
 
-/* ---------- 4. REFERENCIAS AL DOM ---------- */
-const listaProductos = document.getElementById("lista-productos");
-const contadorCarrito = document.getElementById("contador-carrito");
-const btnAbrirCarrito = document.getElementById("btn-abrir-carrito");
-const btnCerrarCarrito = document.getElementById("btn-cerrar-carrito");
-const btnSeguirComprando = document.getElementById("btn-seguir-comprando");
-const panelCarrito = document.getElementById("panel-carrito");
-const fondoOscuro = document.getElementById("fondo-oscuro");
-const carritoVacio = document.getElementById("carrito-vacio");
-const carritoItems = document.getElementById("carrito-items");
-const carritoResumen = document.getElementById("carrito-resumen");
-const valorSubtotal = document.getElementById("valor-subtotal");
-const valorIva = document.getElementById("valor-iva");
-const valorTotal = document.getElementById("valor-total");
-const btnFinalizar = document.getElementById("btn-finalizar");
-const btnVaciar = document.getElementById("btn-vaciar");
-const modalCompra = document.getElementById("modal-compra");
-const modalNumero = document.getElementById("modal-numero");
-const modalDetalle = document.getElementById("modal-detalle");
-const modalSubtotal = document.getElementById("modal-subtotal");
-const modalIva = document.getElementById("modal-iva");
-const modalTotal = document.getElementById("modal-total");
-const btnCerrarModal = document.getElementById("btn-cerrar-modal");
-const notificacion = document.getElementById("notificacion");
+/* ---------- 2. Referencias a elementos del DOM ---------- */
+const formulario = document.getElementById("formEstudiante");
+const tituloFormulario = document.getElementById("tituloFormulario");
+const campoNombre = document.getElementById("nombre");
+const campoIdentificacion = document.getElementById("identificacion");
+const campoCorreo = document.getElementById("correo");
+const campoPrograma = document.getElementById("programa");
+const campoCalificacion = document.getElementById("calificacion");
+const botonGuardar = document.getElementById("btnGuardar");
+const botonCancelar = document.getElementById("btnCancelar");
+const mensaje = document.getElementById("mensaje");
 
-/* ---------- 5. FUNCIONES AUXILIARES ---------- */
-function formatearPrecio(valor) {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(valor);
-}
+const errorNombre = document.getElementById("errorNombre");
+const errorIdentificacion = document.getElementById("errorIdentificacion");
+const errorCorreo = document.getElementById("errorCorreo");
+const errorPrograma = document.getElementById("errorPrograma");
+const errorCalificacion = document.getElementById("errorCalificacion");
 
-function buscarProducto(id) {
-  return productos.find(function (producto) {
-    return producto.id === id;
-  });
-}
+const buscarNombre = document.getElementById("buscarNombre");
+const filtroPrograma = document.getElementById("filtroPrograma");
+const filtroEstado = document.getElementById("filtroEstado");
+const botonLimpiarFiltros = document.getElementById("btnLimpiarFiltros");
+const cuerpoTabla = document.getElementById("cuerpoTabla");
+const contadorResultados = document.getElementById("contadorResultados");
 
-function mostrarNotificacion(mensaje) {
-  notificacion.textContent = mensaje;
-  notificacion.classList.add("visible");
+const indTotal = document.getElementById("indTotal");
+const indPromedio = document.getElementById("indPromedio");
+const indAprobados = document.getElementById("indAprobados");
+const indReprobados = document.getElementById("indReprobados");
+const fechaActual = document.getElementById("fechaActual");
 
-  clearTimeout(temporizadorNotificacion);
-  temporizadorNotificacion = setTimeout(function () {
-    notificacion.classList.remove("visible");
-  }, 2200);
-}
-
-/* ---------- 6. LOCALSTORAGE ---------- */
-function guardarCarrito() {
+/* ---------- 3. Persistencia con LocalStorage ---------- */
+function cargarEstudiantes() {
   try {
-    localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(carrito));
+    const datos = localStorage.getItem(CLAVE_ALMACENAMIENTO);
+    const lista = datos ? JSON.parse(datos) : [];
+    return Array.isArray(lista) ? lista : [];
   } catch (error) {
-    console.warn("No fue posible guardar el carrito:", error);
-  }
-}
-
-function cargarCarrito() {
-  try {
-    const guardado = localStorage.getItem(CLAVE_ALMACENAMIENTO);
-
-    if (!guardado) {
-      return [];
-    }
-
-    const datos = JSON.parse(guardado);
-
-    if (!Array.isArray(datos)) {
-      return [];
-    }
-
-    // Se conservan solo los elementos válidos y que existan en el catálogo
-    return datos
-      .filter(function (item) {
-        return (
-          item &&
-          Number.isInteger(item.id) &&
-          Number.isInteger(item.cantidad) &&
-          item.cantidad > 0 &&
-          buscarProducto(item.id) !== undefined
-        );
-      })
-      .map(function (item) {
-        return { id: item.id, cantidad: item.cantidad };
-      });
-  } catch (error) {
-    console.warn("No fue posible leer el carrito guardado:", error);
+    console.error("No fue posible leer LocalStorage:", error);
     return [];
   }
 }
 
-/* ---------- 7. RENDERIZADO DEL CATÁLOGO ---------- */
-function renderizarProductos() {
-  listaProductos.innerHTML = "";
+function guardarEstudiantes() {
+  try {
+    localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(estudiantes));
+  } catch (error) {
+    console.error("No fue posible guardar en LocalStorage:", error);
+    mostrarMensaje("No fue posible guardar los datos en el navegador.", "error");
+  }
+}
 
-  productos.forEach(function (producto) {
-    const tarjeta = document.createElement("article");
-    tarjeta.className = "tarjeta";
+/* ---------- 4. Funciones de apoyo ---------- */
+function generarId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
 
-    tarjeta.innerHTML = `
-      <div class="tarjeta__imagen" style="background: ${producto.fondo};">
-        <span class="tarjeta__categoria">${producto.categoria}</span>
-        <span class="tarjeta__emoji" aria-hidden="true">${producto.icono}</span>
-      </div>
-      <div class="tarjeta__cuerpo">
-        <h3 class="tarjeta__nombre">${producto.nombre}</h3>
-        <p class="tarjeta__descripcion">${producto.descripcion}</p>
-        <div class="tarjeta__pie">
-          <p class="tarjeta__precio">
-            ${formatearPrecio(producto.precio)}
-            <small>Precio antes de IVA</small>
-          </p>
-          <button class="btn btn--naranja btn-agregar" type="button" data-id="${producto.id}">
-            🛒 Agregar al carrito
-          </button>
-        </div>
-      </div>
-    `;
+function normalizarTexto(texto) {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
 
-    listaProductos.appendChild(tarjeta);
+function obtenerEstado(nota) {
+  return nota >= NOTA_APROBACION ? "Aprobado" : "Reprobado";
+}
+
+function calcularPromedio(lista) {
+  if (lista.length === 0) {
+    return 0;
+  }
+  const suma = lista.reduce((acumulado, estudiante) => acumulado + estudiante.nota, 0);
+  return suma / lista.length;
+}
+
+function mostrarMensaje(texto, tipo) {
+  clearTimeout(temporizadorMensaje);
+  mensaje.textContent = texto;
+  mensaje.className = "mensaje mensaje--" + tipo;
+  temporizadorMensaje = setTimeout(() => {
+    mensaje.textContent = "";
+    mensaje.className = "mensaje";
+  }, 4000);
+}
+
+/* ---------- 5. Indicadores del panel principal ---------- */
+function actualizarIndicadores() {
+  const total = estudiantes.length;
+  const aprobados = estudiantes.filter((e) => obtenerEstado(e.nota) === "Aprobado").length;
+  const reprobados = total - aprobados;
+
+  indTotal.textContent = total;
+  indPromedio.textContent = calcularPromedio(estudiantes).toFixed(2);
+  indAprobados.textContent = aprobados;
+  indReprobados.textContent = reprobados;
+}
+
+/* ---------- 6. Filtros y tabla ---------- */
+function obtenerFiltrados() {
+  const texto = normalizarTexto(buscarNombre.value.trim());
+  const programa = filtroPrograma.value;
+  const estado = filtroEstado.value;
+
+  return estudiantes.filter((e) => {
+    const coincideNombre = normalizarTexto(e.nombre).includes(texto);
+    const coincidePrograma = programa === "todos" || e.programa === programa;
+    const coincideEstado = estado === "todos" || obtenerEstado(e.nota) === estado;
+    return coincideNombre && coincidePrograma && coincideEstado;
   });
 }
 
-/* ---------- 8. LÓGICA DEL CARRITO ---------- */
-function agregarAlCarrito(id) {
-  const producto = buscarProducto(id);
+function crearCelda(texto, clase) {
+  const celda = document.createElement("td");
+  celda.textContent = texto;
+  if (clase) {
+    celda.className = clase;
+  }
+  return celda;
+}
 
-  if (!producto) {
+function crearBoton(texto, accion, id, clase) {
+  const boton = document.createElement("button");
+  boton.type = "button";
+  boton.textContent = texto;
+  boton.className = "btn btn--mini " + clase;
+  boton.dataset.accion = accion;
+  boton.dataset.id = id;
+  return boton;
+}
+
+function renderizarTabla() {
+  const lista = obtenerFiltrados();
+  cuerpoTabla.textContent = "";
+  contadorResultados.textContent =
+    "Mostrando " + lista.length + " de " + estudiantes.length + " estudiantes";
+
+  if (lista.length === 0) {
+    const fila = document.createElement("tr");
+    const celda = crearCelda(
+      estudiantes.length === 0
+        ? "Aún no hay estudiantes registrados."
+        : "Ningún estudiante coincide con los filtros aplicados.",
+      "vacio"
+    );
+    celda.colSpan = 8;
+    fila.appendChild(celda);
+    cuerpoTabla.appendChild(fila);
     return;
   }
 
-  const existente = carrito.find(function (item) {
-    return item.id === id;
-  });
+  lista.forEach((estudiante, indice) => {
+    const fila = document.createElement("tr");
+    const estado = obtenerEstado(estudiante.nota);
 
-  if (existente) {
-    existente.cantidad += 1;
+    fila.appendChild(crearCelda(indice + 1));
+    fila.appendChild(crearCelda(estudiante.identificacion));
+    fila.appendChild(crearCelda(estudiante.nombre));
+    fila.appendChild(crearCelda(estudiante.correo));
+    fila.appendChild(crearCelda(estudiante.programa));
+    fila.appendChild(crearCelda(estudiante.nota.toFixed(1), "nota"));
+
+    const celdaEstado = document.createElement("td");
+    const etiqueta = document.createElement("span");
+    etiqueta.textContent = estado;
+    etiqueta.className = "etiqueta etiqueta--" + estado.toLowerCase();
+    celdaEstado.appendChild(etiqueta);
+    fila.appendChild(celdaEstado);
+
+    const celdaAcciones = document.createElement("td");
+    const contenedorBotones = document.createElement("div");
+    contenedorBotones.className = "acciones-fila";
+    contenedorBotones.appendChild(
+      crearBoton("Editar", "editar", estudiante.id, "btn--editar")
+    );
+    contenedorBotones.appendChild(
+      crearBoton("Eliminar", "eliminar", estudiante.id, "btn--eliminar")
+    );
+    celdaAcciones.appendChild(contenedorBotones);
+    fila.appendChild(celdaAcciones);
+
+    cuerpoTabla.appendChild(fila);
+  });
+}
+
+function actualizarPanel() {
+  actualizarIndicadores();
+  renderizarTabla();
+}
+
+function poblarProgramas() {
+  PROGRAMAS.forEach((programa) => {
+    campoPrograma.appendChild(new Option(programa, programa));
+    filtroPrograma.appendChild(new Option(programa, programa));
+  });
+}
+
+/* ---------- 7. Validaciones ---------- */
+function mostrarError(campo, etiquetaError, texto) {
+  campo.classList.add("invalido");
+  etiquetaError.textContent = texto;
+}
+
+function limpiarErrores() {
+  const pares = [
+    [campoNombre, errorNombre],
+    [campoIdentificacion, errorIdentificacion],
+    [campoCorreo, errorCorreo],
+    [campoPrograma, errorPrograma],
+    [campoCalificacion, errorCalificacion]
+  ];
+  pares.forEach(([campo, etiquetaError]) => {
+    campo.classList.remove("invalido");
+    etiquetaError.textContent = "";
+  });
+}
+
+function validarFormulario() {
+  limpiarErrores();
+  let valido = true;
+
+  const nombre = campoNombre.value.trim().replace(/\s+/g, " ");
+  const identificacion = campoIdentificacion.value.trim();
+  const correo = campoCorreo.value.trim().toLowerCase();
+  const programa = campoPrograma.value;
+  const textoNota = campoCalificacion.value.trim().replace(",", ".");
+
+  // Nombre completo
+  if (nombre === "") {
+    mostrarError(campoNombre, errorNombre, "El nombre completo es obligatorio.");
+    valido = false;
+  } else if (nombre.length < 3) {
+    mostrarError(campoNombre, errorNombre, "El nombre debe tener al menos 3 caracteres.");
+    valido = false;
+  } else if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/.test(nombre)) {
+    mostrarError(campoNombre, errorNombre, "El nombre solo puede contener letras.");
+    valido = false;
+  }
+
+  // Identificación (obligatoria, numérica y sin duplicados)
+  if (identificacion === "") {
+    mostrarError(
+      campoIdentificacion,
+      errorIdentificacion,
+      "La identificación es obligatoria."
+    );
+    valido = false;
+  } else if (!/^\d{5,12}$/.test(identificacion)) {
+    mostrarError(
+      campoIdentificacion,
+      errorIdentificacion,
+      "Use solo números (5 a 12 dígitos)."
+    );
+    valido = false;
+  } else if (
+    estudiantes.some((e) => e.identificacion === identificacion && e.id !== idEnEdicion)
+  ) {
+    mostrarError(
+      campoIdentificacion,
+      errorIdentificacion,
+      "Esta identificación ya está registrada."
+    );
+    valido = false;
+  }
+
+  // Correo electrónico
+  const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (correo === "") {
+    mostrarError(campoCorreo, errorCorreo, "El correo electrónico es obligatorio.");
+    valido = false;
+  } else if (!formatoCorreo.test(correo)) {
+    mostrarError(campoCorreo, errorCorreo, "Ingrese un correo válido (ej: a@dominio.com).");
+    valido = false;
+  }
+
+  // Programa académico
+  if (programa === "" || !PROGRAMAS.includes(programa)) {
+    mostrarError(campoPrograma, errorPrograma, "Seleccione un programa académico.");
+    valido = false;
+  }
+
+  // Calificación (0.0 a 5.0 con máximo un decimal)
+  const nota = Number(textoNota);
+  if (textoNota === "") {
+    mostrarError(campoCalificacion, errorCalificacion, "La calificación es obligatoria.");
+    valido = false;
+  } else if (Number.isNaN(nota)) {
+    mostrarError(campoCalificacion, errorCalificacion, "La calificación debe ser numérica.");
+    valido = false;
+  } else if (nota < NOTA_MINIMA || nota > NOTA_MAXIMA) {
+    mostrarError(
+      campoCalificacion,
+      errorCalificacion,
+      "La calificación debe estar entre 0.0 y 5.0."
+    );
+    valido = false;
+  } else if (Math.abs(nota * 10 - Math.round(nota * 10)) > 1e-9) {
+    mostrarError(campoCalificacion, errorCalificacion, "Use máximo un decimal (ej: 3.5).");
+    valido = false;
+  }
+
+  if (!valido) {
+    return null;
+  }
+  return { nombre, identificacion, correo, programa, nota: Math.round(nota * 10) / 10 };
+}
+
+/* ---------- 8. Operaciones CRUD ---------- */
+function limpiarFormulario() {
+  formulario.reset();
+  limpiarErrores();
+  idEnEdicion = null;
+  tituloFormulario.textContent = "Registrar estudiante";
+  botonGuardar.textContent = "Registrar estudiante";
+  botonCancelar.hidden = true;
+}
+
+function manejarEnvio(evento) {
+  evento.preventDefault();
+  const datos = validarFormulario();
+
+  if (datos === null) {
+    mostrarMensaje("Revise los campos marcados en rojo.", "error");
+    return;
+  }
+
+  if (idEnEdicion !== null) {
+    const posicion = estudiantes.findIndex((e) => e.id === idEnEdicion);
+    if (posicion !== -1) {
+      estudiantes[posicion] = { ...estudiantes[posicion], ...datos };
+    }
+    mostrarMensaje("Estudiante actualizado correctamente.", "exito");
   } else {
-    carrito.push({ id: id, cantidad: 1 });
+    estudiantes.push({ id: generarId(), ...datos });
+    mostrarMensaje("Estudiante registrado correctamente.", "exito");
   }
 
-  guardarCarrito();
-  renderizarCarrito();
-  animarContador();
-  mostrarNotificacion("✔ " + producto.nombre + " agregado al carrito");
+  guardarEstudiantes();
+  limpiarFormulario();
+  actualizarPanel();
 }
 
-function cambiarCantidad(id, cambio) {
-  const item = carrito.find(function (elemento) {
-    return elemento.id === id;
+function editarEstudiante(id) {
+  const estudiante = estudiantes.find((e) => e.id === id);
+  if (!estudiante) {
+    return;
+  }
+
+  limpiarErrores();
+  idEnEdicion = id;
+  campoNombre.value = estudiante.nombre;
+  campoIdentificacion.value = estudiante.identificacion;
+  campoCorreo.value = estudiante.correo;
+  campoPrograma.value = estudiante.programa;
+  campoCalificacion.value = estudiante.nota;
+
+  tituloFormulario.textContent = "Editar estudiante";
+  botonGuardar.textContent = "Guardar cambios";
+  botonCancelar.hidden = false;
+
+  formulario.scrollIntoView({ behavior: "smooth", block: "center" });
+  campoNombre.focus();
+}
+
+function eliminarEstudiante(id) {
+  const estudiante = estudiantes.find((e) => e.id === id);
+  if (!estudiante) {
+    return;
+  }
+
+  const confirmado = window.confirm("¿Desea eliminar a " + estudiante.nombre + "?");
+  if (!confirmado) {
+    return;
+  }
+
+  estudiantes = estudiantes.filter((e) => e.id !== id);
+  if (idEnEdicion === id) {
+    limpiarFormulario();
+  }
+
+  guardarEstudiantes();
+  actualizarPanel();
+  mostrarMensaje("Estudiante eliminado correctamente.", "exito");
+}
+
+/* ---------- 9. Eventos ---------- */
+function limpiarFiltros() {
+  buscarNombre.value = "";
+  filtroPrograma.value = "todos";
+  filtroEstado.value = "todos";
+  renderizarTabla();
+}
+
+function registrarEventos() {
+  formulario.addEventListener("submit", manejarEnvio);
+  botonCancelar.addEventListener("click", limpiarFormulario);
+
+  buscarNombre.addEventListener("input", renderizarTabla);
+  filtroPrograma.addEventListener("change", renderizarTabla);
+  filtroEstado.addEventListener("change", renderizarTabla);
+  botonLimpiarFiltros.addEventListener("click", limpiarFiltros);
+
+  // Delegación de eventos: un solo "click" para todos los botones de la tabla
+  cuerpoTabla.addEventListener("click", (evento) => {
+    const boton = evento.target.closest("button[data-accion]");
+    if (!boton) {
+      return;
+    }
+    if (boton.dataset.accion === "editar") {
+      editarEstudiante(boton.dataset.id);
+    } else if (boton.dataset.accion === "eliminar") {
+      eliminarEstudiante(boton.dataset.id);
+    }
   });
 
-  if (!item) {
-    return;
-  }
-
-  item.cantidad += cambio;
-
-  // Si la cantidad llega a cero, el producto se elimina del carrito
-  if (item.cantidad <= 0) {
-    eliminarProducto(id);
-    return;
-  }
-
-  guardarCarrito();
-  renderizarCarrito();
-}
-
-function eliminarProducto(id) {
-  carrito = carrito.filter(function (item) {
-    return item.id !== id;
+  // Al escribir en un campo se quita su mensaje de error
+  [
+    [campoNombre, errorNombre],
+    [campoIdentificacion, errorIdentificacion],
+    [campoCorreo, errorCorreo],
+    [campoPrograma, errorPrograma],
+    [campoCalificacion, errorCalificacion]
+  ].forEach(([campo, etiquetaError]) => {
+    const quitarError = () => {
+      campo.classList.remove("invalido");
+      etiquetaError.textContent = "";
+    };
+    campo.addEventListener("input", quitarError);
+    campo.addEventListener("change", quitarError);
   });
-
-  guardarCarrito();
-  renderizarCarrito();
-  mostrarNotificacion("Producto eliminado del carrito");
 }
 
-function vaciarCarrito() {
-  if (carrito.length === 0) {
-    mostrarNotificacion("El carrito ya está vacío");
-    return;
-  }
-
-  carrito = [];
-  guardarCarrito();
-  renderizarCarrito();
-  mostrarNotificacion("Carrito vaciado");
-}
-
-function contarUnidades() {
-  return carrito.reduce(function (acumulado, item) {
-    return acumulado + item.cantidad;
-  }, 0);
-}
-
-function calcularTotales() {
-  const subtotal = carrito.reduce(function (acumulado, item) {
-    const producto = buscarProducto(item.id);
-    return acumulado + producto.precio * item.cantidad;
-  }, 0);
-
-  const iva = Math.round(subtotal * TASA_IVA);
-  const total = subtotal + iva;
-
-  return { subtotal: subtotal, iva: iva, total: total };
-}
-
-/* ---------- 9. RENDERIZADO DEL CARRITO ---------- */
-function renderizarCarrito() {
-  carritoItems.innerHTML = "";
-
-  carrito.forEach(function (item) {
-    const producto = buscarProducto(item.id);
-    const subtotalItem = producto.precio * item.cantidad;
-
-    const elemento = document.createElement("li");
-    elemento.className = "item";
-
-    elemento.innerHTML = `
-      <div class="item__miniatura" style="background: ${producto.fondo};" aria-hidden="true">
-        ${producto.icono}
-      </div>
-      <div class="item__info">
-        <p class="item__nombre">${producto.nombre}</p>
-        <p class="item__precio">${formatearPrecio(producto.precio)} c/u</p>
-        <p class="item__subtotal">${formatearPrecio(subtotalItem)}</p>
-      </div>
-      <div class="item__acciones">
-        <div class="cantidad">
-          <button class="cantidad__btn"
-            type="button"
-            data-accion="disminuir"
-            data-id="${producto.id}"
-            aria-label="Disminuir cantidad de ${producto.nombre}">−</button>
-          <span class="cantidad__valor">${item.cantidad}</span>
-          <button class="cantidad__btn"
-            type="button"
-            data-accion="aumentar"
-            data-id="${producto.id}"
-            aria-label="Aumentar cantidad de ${producto.nombre}">+</button>
-        </div>
-        <button class="btn-eliminar"
-          type="button"
-          data-accion="eliminar"
-          data-id="${producto.id}">Eliminar</button>
-      </div>
-    `;
-
-    carritoItems.appendChild(elemento);
-  });
-
-  const hayProductos = carrito.length > 0;
-  carritoVacio.hidden = hayProductos;
-  carritoItems.hidden = !hayProductos;
-  carritoResumen.hidden = !hayProductos;
-
-  const totales = calcularTotales();
-  valorSubtotal.textContent = formatearPrecio(totales.subtotal);
-  valorIva.textContent = formatearPrecio(totales.iva);
-  valorTotal.textContent = formatearPrecio(totales.total);
-
-  contadorCarrito.textContent = contarUnidades();
-}
-
-function animarContador() {
-  contadorCarrito.classList.remove("animar");
-  // Se fuerza un reflujo para poder reiniciar la animación
-  void contadorCarrito.offsetWidth;
-  contadorCarrito.classList.add("animar");
-}
-
-/* ---------- 10. PANEL DEL CARRITO ---------- */
-function abrirCarrito() {
-  panelCarrito.classList.add("abierto");
-  panelCarrito.setAttribute("aria-hidden", "false");
-  fondoOscuro.classList.add("visible");
-  document.body.classList.add("bloqueado");
-}
-
-function cerrarCarrito() {
-  panelCarrito.classList.remove("abierto");
-  panelCarrito.setAttribute("aria-hidden", "true");
-  fondoOscuro.classList.remove("visible");
-  document.body.classList.remove("bloqueado");
-}
-
-/* ---------- 11. COMPRA SIMULADA ---------- */
-function finalizarCompra() {
-  if (carrito.length === 0) {
-    mostrarNotificacion("Agrega productos antes de finalizar la compra");
-    return;
-  }
-
-  const totales = calcularTotales();
-  const numeroPedido = "#" + Math.floor(100000 + Math.random() * 900000);
-
-  modalDetalle.innerHTML = "";
-
-  carrito.forEach(function (item) {
-    const producto = buscarProducto(item.id);
-    const linea = document.createElement("li");
-
-    linea.innerHTML = `
-      <span>${item.cantidad} × ${producto.nombre}</span>
-      <span>${formatearPrecio(producto.precio * item.cantidad)}</span>
-    `;
-
-    modalDetalle.appendChild(linea);
-  });
-
-  modalNumero.textContent = numeroPedido;
-  modalSubtotal.textContent = formatearPrecio(totales.subtotal);
-  modalIva.textContent = formatearPrecio(totales.iva);
-  modalTotal.textContent = formatearPrecio(totales.total);
-
-  // Se vacía el carrito porque la compra ya fue "realizada"
-  carrito = [];
-  guardarCarrito();
-  renderizarCarrito();
-  cerrarCarrito();
-
-  modalCompra.classList.add("visible");
-  modalCompra.setAttribute("aria-hidden", "false");
-  document.body.classList.add("bloqueado");
-}
-
-function cerrarModal() {
-  modalCompra.classList.remove("visible");
-  modalCompra.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("bloqueado");
-}
-
-/* ---------- 12. EVENTOS ---------- */
-// Delegación de eventos: botones "Agregar al carrito" del catálogo
-listaProductos.addEventListener("click", function (evento) {
-  const boton = evento.target.closest(".btn-agregar");
-
-  if (boton) {
-    agregarAlCarrito(Number(boton.dataset.id));
-  }
-});
-
-// Delegación de eventos: botones dentro del carrito (+, −, Eliminar)
-carritoItems.addEventListener("click", function (evento) {
-  const boton = evento.target.closest("button[data-accion]");
-
-  if (!boton) {
-    return;
-  }
-
-  const id = Number(boton.dataset.id);
-  const accion = boton.dataset.accion;
-
-  if (accion === "aumentar") {
-    cambiarCantidad(id, 1);
-  } else if (accion === "disminuir") {
-    cambiarCantidad(id, -1);
-  } else if (accion === "eliminar") {
-    eliminarProducto(id);
-  }
-});
-
-btnAbrirCarrito.addEventListener("click", abrirCarrito);
-btnCerrarCarrito.addEventListener("click", cerrarCarrito);
-fondoOscuro.addEventListener("click", cerrarCarrito);
-
-btnSeguirComprando.addEventListener("click", function () {
-  cerrarCarrito();
-  document.getElementById("catalogo").scrollIntoView({ behavior: "smooth" });
-});
-
-btnVaciar.addEventListener("click", vaciarCarrito);
-btnFinalizar.addEventListener("click", finalizarCompra);
-btnCerrarModal.addEventListener("click", cerrarModal);
-
-modalCompra.addEventListener("click", function (evento) {
-  if (evento.target === modalCompra) {
-    cerrarModal();
-  }
-});
-
-document.addEventListener("keydown", function (evento) {
-  if (evento.key === "Escape") {
-    cerrarModal();
-    cerrarCarrito();
-  }
-});
-
-/* ---------- 13. INICIALIZACIÓN ---------- */
+/* ---------- 10. Inicio de la aplicación ---------- */
 function iniciarAplicacion() {
-  carrito = cargarCarrito();
-  renderizarProductos();
-  renderizarCarrito();
+  fechaActual.textContent = new Date().toLocaleDateString("es-CO", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+
+  estudiantes = cargarEstudiantes();
+  poblarProgramas();
+  registrarEventos();
+  actualizarPanel();
 }
 
-iniciarAplicacion();
+document.addEventListener("DOMContentLoaded", iniciarAplicacion);
