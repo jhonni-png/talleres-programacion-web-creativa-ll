@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Analítica Empresarial | Taller 16</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Sistema POS de Ventas e Inventario | Taller 17</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="app">
@@ -12,219 +12,233 @@
     <!-- ========== MENÚ LATERAL ========== -->
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <span class="brand-logo">N</span>
+        <span class="brand-logo">P</span>
         <div class="brand-text">
-          <strong>NexoAnalytics</strong>
-          <small>Business Intelligence</small>
+          <strong>POS Académico</strong>
+          <small>Ventas e inventario</small>
         </div>
       </div>
  
-      <p class="menu-title">Navegación</p>
       <nav class="menu" aria-label="Menú principal">
-        <a class="menu-link active" href="#resumen">Resumen general</a>
-        <a class="menu-link" href="#graficos">Gráficos</a>
-        <a class="menu-link" href="#transacciones">Transacciones</a>
-        <a class="menu-link" href="#reportes">Reportes</a>
+        <button class="menu-link active" type="button" data-vista="dashboard">Dashboard</button>
+        <button class="menu-link" type="button" data-vista="ventas">Punto de venta</button>
+        <button class="menu-link" type="button" data-vista="productos">Productos e inventario</button>
+        <button class="menu-link" type="button" data-vista="comprobantes">Comprobantes</button>
       </nav>
  
       <div class="sidebar-footer">
-        <strong>Taller 16</strong>
+        <strong>Taller 17</strong>
         <small>Programación Web Creativa II</small>
-        <small>Universidad de Caldas</small>
+        <small>Simulación académica: no es un sistema de cobro real</small>
       </div>
     </aside>
     <div class="overlay" id="overlay"></div>
  
     <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <div class="main">
- 
       <header class="topbar">
         <button class="btn-menu" id="btnMenu" type="button" aria-label="Abrir o cerrar el menú">Menú</button>
         <div class="topbar-title">
-          <h1>Dashboard de Analítica Empresarial</h1>
+          <h1 id="tituloVista">Dashboard</h1>
           <p id="fechaActual"></p>
         </div>
         <div class="topbar-user">
-          <span class="avatar">AD</span>
+          <span class="avatar">CJ</span>
           <div class="user-text">
-            <strong>Administrador</strong>
-            <small>Gerencia comercial</small>
+            <strong>Caja principal</strong>
+            <small>Turno activo</small>
           </div>
         </div>
       </header>
  
       <main class="content">
  
-        <!-- ===== RESUMEN GENERAL ===== -->
-        <section id="resumen" class="section">
-          <div class="section-head">
-            <div>
-              <h2>Resumen general</h2>
-              <p>Indicadores clave del año 2026 comparados con el año 2025.</p>
-            </div>
-            <div class="filters">
-              <label class="field">Mes
-                <select id="filtroMes"></select>
-              </label>
-              <label class="field">Categoría
-                <select id="filtroCategoria"></select>
-              </label>
-              <button id="btnReset" class="btn btn-outline" type="button">Restablecer filtros</button>
-              <button class="btn btn-primary js-exportar" type="button">Exportar CSV</button>
-            </div>
-          </div>
- 
+        <!-- ===== VISTA: DASHBOARD ===== -->
+        <section class="vista activa" id="vista-dashboard">
           <div class="kpi-grid">
             <article class="card kpi">
-              <div class="kpi-icon blue">$</div>
+              <div class="kpi-icon azul">P</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Total de productos</span>
+                <strong class="kpi-value" id="kpiProductos">0</strong>
+              </div>
+            </article>
+            <article class="card kpi">
+              <div class="kpi-icon verde">V</div>
               <div class="kpi-body">
                 <span class="kpi-label">Total de ventas</span>
-                <strong class="kpi-value" id="kpiVentas">$ 0</strong>
-                <span class="delta" id="deltaVentas"></span>
+                <strong class="kpi-value" id="kpiVentas">0</strong>
               </div>
             </article>
             <article class="card kpi">
-              <div class="kpi-icon cyan">C</div>
+              <div class="kpi-icon verde">$</div>
               <div class="kpi-body">
-                <span class="kpi-label">Número de clientes</span>
-                <strong class="kpi-value" id="kpiClientes">0</strong>
-                <span class="delta" id="deltaClientes"></span>
+                <span class="kpi-label">Valor acumulado</span>
+                <strong class="kpi-value" id="kpiAcumulado">$ 0</strong>
               </div>
             </article>
             <article class="card kpi">
-              <div class="kpi-icon violet">P</div>
+              <div class="kpi-icon ambar">!</div>
               <div class="kpi-body">
-                <span class="kpi-label">Número de pedidos</span>
-                <strong class="kpi-value" id="kpiPedidos">0</strong>
-                <span class="delta" id="deltaPedidos"></span>
-              </div>
-            </article>
-            <article class="card kpi">
-              <div class="kpi-icon green">%</div>
-              <div class="kpi-body">
-                <span class="kpi-label">Crecimiento anual</span>
-                <strong class="kpi-value" id="kpiCrecimiento">0 %</strong>
-                <span class="delta" id="deltaCrecimiento"></span>
+                <span class="kpi-label">Productos con bajo inventario</span>
+                <strong class="kpi-value" id="kpiBajo">0</strong>
               </div>
             </article>
           </div>
  
-          <h3 class="subtitle">Indicadores de comparación</h3>
-          <div class="compare-grid">
-            <article class="card compare">
-              <span class="kpi-label">Ticket promedio</span>
-              <strong class="compare-value" id="cmpTicket">$ 0</strong>
-              <span class="delta" id="deltaTicket"></span>
+          <div class="dashboard-grid">
+            <article class="card panel">
+              <h2>Alertas de inventario</h2>
+              <ul class="lista-alertas" id="listaBajo"></ul>
             </article>
-            <article class="card compare">
-              <span class="kpi-label">Cumplimiento de la meta</span>
-              <strong class="compare-value" id="cmpMeta">0 %</strong>
-              <div class="progress" aria-hidden="true"><span id="barraMeta"></span></div>
-              <small class="muted" id="textoMeta"></small>
-            </article>
-            <article class="card compare">
-              <span class="kpi-label">Mejor mes</span>
-              <strong class="compare-value" id="cmpMes">-</strong>
-              <small class="muted" id="cmpMesValor"></small>
-            </article>
-            <article class="card compare">
-              <span class="kpi-label">Categoría líder</span>
-              <strong class="compare-value" id="cmpCategoria">-</strong>
-              <small class="muted" id="cmpCategoriaValor"></small>
+            <article class="card panel">
+              <h2>Últimas transacciones</h2>
+              <div class="tabla-scroll">
+                <table>
+                  <thead>
+                    <tr><th>N.º</th><th>Fecha</th><th>Método</th><th class="num">Total</th></tr>
+                  </thead>
+                  <tbody id="ultimasVentas"></tbody>
+                </table>
+              </div>
             </article>
           </div>
         </section>
  
-        <!-- ===== GRÁFICOS ===== -->
-        <section id="graficos" class="section">
-          <div class="section-head">
-            <div>
-              <h2>Análisis gráfico</h2>
-              <p>Los gráficos se dibujan con la API Canvas y se actualizan con los filtros.</p>
+        <!-- ===== VISTA: PUNTO DE VENTA ===== -->
+        <section class="vista" id="vista-ventas">
+          <div class="pos-grid">
+ 
+            <div class="pos-catalogo">
+              <div class="barra-filtros">
+                <input type="search" id="buscadorCatalogo" class="campo" placeholder="Buscar producto por nombre..." aria-label="Buscar producto por nombre">
+                <select id="filtroCategoriaCatalogo" class="campo" aria-label="Filtrar catálogo por categoría"></select>
+              </div>
+              <div class="catalogo" id="catalogo"></div>
             </div>
-          </div>
  
-          <div class="charts-grid">
-            <article class="card chart-card chart-bar">
-              <header class="chart-head">
-                <h3>Ventas por mes</h3>
-                <span class="chip">2026</span>
-              </header>
-              <div class="chart-wrap"><canvas id="graficoBarras" aria-label="Gráfico de barras de ventas por mes" role="img"></canvas></div>
-            </article>
+            <aside class="card carrito" aria-label="Carrito de compras">
+              <h2>Carrito de venta</h2>
+              <ul class="lista-carrito" id="listaCarrito"></ul>
  
-            <article class="card chart-card chart-pie">
-              <header class="chart-head">
-                <h3>Ventas por categoría</h3>
-                <span class="chip">Distribución</span>
-              </header>
-              <div class="chart-wrap"><canvas id="graficoCircular" aria-label="Gráfico circular de ventas por categoría" role="img"></canvas></div>
-              <ul class="legend" id="leyendaCategorias"></ul>
-            </article>
+              <dl class="totales">
+                <div><dt>Subtotal</dt><dd id="resSubtotal">$ 0</dd></div>
+                <div><dt>IVA (19 %)</dt><dd id="resIva">$ 0</dd></div>
+                <div class="total-final"><dt>Total a pagar</dt><dd id="resTotal">$ 0</dd></div>
+              </dl>
  
-            <article class="card chart-card chart-line">
-              <header class="chart-head">
-                <h3>Comparación de resultados: 2026 frente a 2025</h3>
-                <div class="legend-inline">
-                  <span class="dot dot-blue"></span>2026
-                  <span class="dot dot-gray"></span>2025
-                </div>
-              </header>
-              <div class="chart-wrap"><canvas id="graficoLineas" aria-label="Gráfico de líneas comparando 2026 y 2025" role="img"></canvas></div>
-            </article>
+              <label class="etiqueta" for="metodoPago">Método de pago (simulado)</label>
+              <select id="metodoPago" class="campo"></select>
+ 
+              <div id="campoEfectivo">
+                <label class="etiqueta" for="montoRecibido">Efectivo recibido</label>
+                <input type="number" id="montoRecibido" class="campo" min="0" step="100" placeholder="0">
+                <p class="cambio">Cambio a devolver: <strong id="resCambio">$ 0</strong></p>
+              </div>
+ 
+              <div class="acciones-carrito">
+                <button class="btn btn-verde" id="btnRegistrar" type="button">Registrar venta</button>
+                <button class="btn btn-gris" id="btnVaciar" type="button">Vaciar carrito</button>
+              </div>
+            </aside>
           </div>
         </section>
  
-        <!-- ===== TRANSACCIONES ===== -->
-        <section id="transacciones" class="section">
-          <div class="section-head">
-            <div>
-              <h2>Transacciones</h2>
-              <p id="resumenTabla"></p>
-            </div>
-            <div class="filters">
-              <input type="search" id="buscador" class="search" placeholder="Buscar por cliente, producto o ID..." aria-label="Buscar registros">
-            </div>
-          </div>
+        <!-- ===== VISTA: PRODUCTOS E INVENTARIO ===== -->
+        <section class="vista" id="vista-productos">
+          <article class="card panel">
+            <h2 id="tituloFormulario">Registrar producto</h2>
+            <form id="formProducto" class="formulario" novalidate>
+              <input type="hidden" id="prodId">
+              <label class="etiqueta">Nombre
+                <input type="text" id="prodNombre" class="campo" maxlength="60" required>
+              </label>
+              <label class="etiqueta">Código o SKU
+                <input type="text" id="prodSku" class="campo" maxlength="20" required>
+              </label>
+              <label class="etiqueta">Categoría
+                <input type="text" id="prodCategoria" class="campo" list="listaCategorias" maxlength="30" required>
+                <datalist id="listaCategorias"></datalist>
+              </label>
+              <label class="etiqueta">Precio (COP, sin IVA)
+                <input type="number" id="prodPrecio" class="campo" min="1" step="1" required>
+              </label>
+              <label class="etiqueta">Cantidad disponible
+                <input type="number" id="prodCantidad" class="campo" min="0" step="1" required>
+              </label>
+              <div class="acciones-form">
+                <button class="btn btn-azul" id="btnGuardarProducto" type="submit">Guardar producto</button>
+                <button class="btn btn-gris" id="btnCancelarEdicion" type="button">Cancelar</button>
+              </div>
+            </form>
+            <p class="mensaje-form" id="mensajeForm" role="alert"></p>
+          </article>
  
-          <div class="card table-card">
-            <div class="table-scroll">
-              <table id="tablaTransacciones">
-                <thead><tr id="encabezadoTabla"></tr></thead>
-                <tbody id="cuerpoTabla"></tbody>
+          <article class="card panel">
+            <div class="panel-cabecera">
+              <div>
+                <h2>Inventario</h2>
+                <p class="muted" id="resumenInventario"></p>
+              </div>
+              <div class="barra-filtros">
+                <input type="search" id="buscadorInventario" class="campo" placeholder="Buscar por nombre..." aria-label="Buscar en el inventario">
+                <select id="filtroCategoriaInventario" class="campo" aria-label="Filtrar inventario por categoría"></select>
+                <button class="btn btn-gris" id="btnRestaurar" type="button">Restaurar datos de ejemplo</button>
+              </div>
+            </div>
+            <div class="tabla-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>SKU</th><th>Producto</th><th>Categoría</th>
+                    <th class="num">Precio</th><th class="num">Existencias</th>
+                    <th>Estado</th><th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoInventario"></tbody>
               </table>
             </div>
-          </div>
+          </article>
         </section>
  
-        <!-- ===== REPORTES ===== -->
-        <section id="reportes" class="section">
-          <div class="section-head">
-            <div>
-              <h2>Reporte ejecutivo</h2>
-              <p>Resumen automático según los filtros que estén activos.</p>
+        <!-- ===== VISTA: COMPROBANTES ===== -->
+        <section class="vista" id="vista-comprobantes">
+          <article class="card panel">
+            <h2>Historial de ventas</h2>
+            <div class="tabla-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>N.º</th><th>Fecha</th><th>Método</th><th class="num">Artículos</th>
+                    <th class="num">Subtotal</th><th class="num">IVA</th><th class="num">Total</th><th>Comprobante</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoHistorial"></tbody>
+              </table>
             </div>
-            <div class="filters">
-              <button id="btnImprimir" class="btn btn-outline" type="button">Imprimir reporte</button>
-              <button class="btn btn-primary js-exportar" type="button">Exportar CSV</button>
-            </div>
-          </div>
- 
-          <article class="card report">
-            <h3 id="reporteTitulo"></h3>
-            <ul id="reporteLista"></ul>
           </article>
         </section>
  
         <footer class="footer">
-          <p>Taller 16 · Dashboard de Analítica Empresarial · Programación Web Creativa II · Universidad de Caldas</p>
-          <p>Datos ficticios con fines académicos.</p>
+          <p>Taller 17 · Sistema POS de Ventas e Inventario · Universidad de Caldas</p>
+          <p>Simulación académica. No procesa pagos reales ni tiene validez fiscal.</p>
         </footer>
       </main>
     </div>
   </div>
  
-  <div class="tooltip" id="tooltip" role="status"></div>
+  <!-- ========== COMPROBANTE (VENTANA MODAL) ========== -->
+  <div class="modal" id="modalComprobante" role="dialog" aria-modal="true" aria-label="Comprobante de venta">
+    <div class="modal-caja">
+      <div id="comprobanteContenido" class="comprobante"></div>
+      <div class="modal-acciones">
+        <button class="btn btn-azul" id="btnImprimir" type="button">Imprimir comprobante</button>
+        <button class="btn btn-gris" id="btnCerrarModal" type="button">Cerrar</button>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="toast" id="aviso" role="status"></div>
  
   <script src="script.js" defer></script>
 </body>

@@ -1,893 +1,832 @@
 "use strict";
  
 /* =========================================================
-   TALLER 16 - DASHBOARD DE ANALÍTICA EMPRESARIAL
+   TALLER 17 - SISTEMA POS DE VENTAS E INVENTARIO
    Universidad de Caldas | Programación Web Creativa II
+   Simulación académica: no procesa pagos reales.
    ========================================================= */
  
-/* ---------- 1. DATOS EMPRESARIALES FICTICIOS ---------- */
-const ANIO_ACTUAL = 2026;
-const ANIO_ANTERIOR = 2025;
-const META_CRECIMIENTO = 10; // meta de crecimiento anual en %
+/* ---------- 1. CONSTANTES Y DATOS INICIALES ---------- */
+const CLAVE_PRODUCTOS = "pos_productos_v1";
+const CLAVE_VENTAS = "pos_ventas_v1";
+const TASA_IVA = 0.19;
+const UMBRAL_BAJO = 5;
+const METODOS_PAGO = ["Efectivo", "Tarjeta débito", "Tarjeta crédito", "Transferencia", "Billetera digital"];
  
-const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
- 
-const CATEGORIAS = [
-  { nombre: "Tecnología", color: "#1d4ed8" },
-  { nombre: "Hogar", color: "#06b6d4" },
-  { nombre: "Moda", color: "#8b5cf6" },
-  { nombre: "Deportes", color: "#16a34a" },
-  { nombre: "Salud", color: "#f59e0b" }
+const PRODUCTOS_EJEMPLO = [
+  { id: 1, nombre: "Café molido 500 g", sku: "ALI-001", categoria: "Alimentos", precio: 18500, cantidad: 40 },
+  { id: 2, nombre: "Chocolate de mesa 250 g", sku: "ALI-002", categoria: "Alimentos", precio: 7200, cantidad: 25 },
+  { id: 3, nombre: "Galletas integrales", sku: "ALI-003", categoria: "Alimentos", precio: 3500, cantidad: 4 },
+  { id: 4, nombre: "Agua mineral 600 ml", sku: "BEB-001", categoria: "Bebidas", precio: 2800, cantidad: 60 },
+  { id: 5, nombre: "Jugo de naranja 1 L", sku: "BEB-002", categoria: "Bebidas", precio: 6400, cantidad: 18 },
+  { id: 6, nombre: "Gaseosa cola 1,5 L", sku: "BEB-003", categoria: "Bebidas", precio: 5900, cantidad: 3 },
+  { id: 7, nombre: "Cuaderno cuadriculado", sku: "PAP-001", categoria: "Papelería", precio: 8900, cantidad: 32 },
+  { id: 8, nombre: "Bolígrafo azul", sku: "PAP-002", categoria: "Papelería", precio: 1800, cantidad: 80 },
+  { id: 9, nombre: "Resaltadores x4", sku: "PAP-003", categoria: "Papelería", precio: 12500, cantidad: 0 },
+  { id: 10, nombre: "Memoria USB 64 GB", sku: "TEC-001", categoria: "Tecnología", precio: 38000, cantidad: 14 },
+  { id: 11, nombre: "Audífonos con cable", sku: "TEC-002", categoria: "Tecnología", precio: 29900, cantidad: 5 },
+  { id: 12, nombre: "Cargador USB-C", sku: "TEC-003", categoria: "Tecnología", precio: 45000, cantidad: 9 }
 ];
  
-const PRODUCTOS = {
-  "Tecnología": [
-    { nombre: "Portátil Pro 14", precio: 3200000 },
-    { nombre: "Monitor 27 pulgadas", precio: 980000 },
-    { nombre: "Teclado mecánico", precio: 240000 },
-    { nombre: "Audífonos inalámbricos", precio: 310000 }
-  ],
-  "Hogar": [
-    { nombre: "Aspiradora robot", precio: 1250000 },
-    { nombre: "Licuadora industrial", precio: 420000 },
-    { nombre: "Lámpara LED de mesa", precio: 95000 },
-    { nombre: "Set de cocina", precio: 360000 }
-  ],
-  "Moda": [
-    { nombre: "Chaqueta urbana", precio: 280000 },
-    { nombre: "Zapatillas casuales", precio: 230000 },
-    { nombre: "Bolso de cuero", precio: 340000 },
-    { nombre: "Reloj clásico", precio: 450000 }
-  ],
-  "Deportes": [
-    { nombre: "Bicicleta de montaña", precio: 1800000 },
-    { nombre: "Balón profesional", precio: 130000 },
-    { nombre: "Kit de pesas", precio: 520000 },
-    { nombre: "Tenis de running", precio: 380000 }
-  ],
-  "Salud": [
-    { nombre: "Tensiómetro digital", precio: 180000 },
-    { nombre: "Suplemento proteico", precio: 150000 },
-    { nombre: "Báscula inteligente", precio: 210000 },
-    { nombre: "Masajeador eléctrico", precio: 290000 }
-  ]
+/* ---------- 2. ESTADO DE LA APLICACIÓN ---------- */
+let productos = [];
+let ventas = [];
+const carrito = []; // elementos: { id, cantidad }
+ 
+const filtros = {
+  catalogo: { texto: "", categoria: "todas" },
+  inventario: { texto: "", categoria: "todas" }
 };
  
-const CLIENTES = [
-  "Comercial Andina S.A.S.", "Distribuciones El Cafetal", "Grupo Nevado Ltda.", "Inversiones Cumanday",
-  "Tecnoservicios del Eje", "Almacenes La Esperanza", "Corporación Alta Montaña", "Suministros Manizales",
-  "Inmobiliaria Los Nogales", "Oficentro Caldas", "Ferretería Central", "Papelería Universal",
-  "Constructora Río Claro", "Clínica San Rafael", "Hotel Termales del Ruiz", "Cooperativa Cafetera"
-];
- 
-const ESTADOS = ["Pagado", "Pagado", "Pagado", "Pendiente"]; // 75 % pagados
- 
-// Estacionalidad: factor de ventas esperado para cada mes
-const ESTACIONALIDAD = [0.85, 0.8, 0.95, 0.9, 1, 1.05, 1.1, 1, 0.95, 1.05, 1.25, 1.4];
- 
-/* Generador pseudoaleatorio con semilla: produce siempre los mismos datos */
-function crearGenerador(semilla) {
-  let a = semilla;
-  return function () {
-    a |= 0;
-    a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
- 
-const aleatorio = crearGenerador(2026);
-const elegir = (lista) => lista[Math.floor(aleatorio() * lista.length)];
- 
-function generarTransacciones() {
-  const lista = [];
- 
-  [ANIO_ANTERIOR, ANIO_ACTUAL].forEach((anio) => {
-    const factorPrecio = anio === ANIO_ACTUAL ? 1.06 : 1;
-    const factorVolumen = anio === ANIO_ACTUAL ? 1.08 : 1;
-    let consecutivo = 1;
- 
-    MESES.forEach((_, indiceMes) => {
-      const cantidadRegistros = Math.round((10 + aleatorio() * 6) * ESTACIONALIDAD[indiceMes] * factorVolumen);
- 
-      for (let i = 0; i < cantidadRegistros; i++) {
-        const categoria = elegir(CATEGORIAS).nombre;
-        const producto = elegir(PRODUCTOS[categoria]);
-        const cantidad = 1 + Math.floor(aleatorio() * 4);
-        const dia = 1 + Math.floor(aleatorio() * 28);
-        const precioUnitario = Math.round((producto.precio * factorPrecio) / 1000) * 1000;
- 
-        lista.push({
-          id: `TRX-${anio}-${String(consecutivo++).padStart(4, "0")}`,
-          fecha: `${anio}-${String(indiceMes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`,
-          anio: anio,
-          mes: indiceMes,
-          cliente: elegir(CLIENTES),
-          categoria: categoria,
-          producto: producto.nombre,
-          cantidad: cantidad,
-          total: precioUnitario * cantidad,
-          estado: elegir(ESTADOS)
-        });
-      }
-    });
-  });
- 
-  return lista;
-}
- 
-const transacciones = generarTransacciones();
- 
-/* ---------- 2. ESTADO DE LA APLICACIÓN Y UTILIDADES ---------- */
-const estado = {
-  mes: "todos",
-  categoria: "todas",
-  busqueda: "",
-  orden: { clave: "fecha", direccion: "desc" }
+const TITULOS_VISTA = {
+  dashboard: "Dashboard",
+  ventas: "Punto de venta",
+  productos: "Productos e inventario",
+  comprobantes: "Comprobantes"
 };
  
-const COLUMNAS = [
-  { clave: "id", titulo: "ID", tipo: "texto" },
-  { clave: "fecha", titulo: "Fecha", tipo: "texto" },
-  { clave: "cliente", titulo: "Cliente", tipo: "texto" },
-  { clave: "categoria", titulo: "Categoría", tipo: "texto" },
-  { clave: "producto", titulo: "Producto", tipo: "texto" },
-  { clave: "cantidad", titulo: "Cant.", tipo: "numero" },
-  { clave: "total", titulo: "Total", tipo: "numero" },
-  { clave: "estado", titulo: "Estado", tipo: "texto" }
-];
- 
-const COLORES = {
-  marino: "#0b1f4d",
-  azul: "#2563eb",
-  gris: "#94a3b8",
-  texto: "#64748b",
-  linea: "#e5e9f2"
-};
-const FUENTE = '"Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
- 
+/* ---------- 3. UTILIDADES ---------- */
 const $ = (id) => document.getElementById(id);
  
 const formatoMoneda = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
-const formatoNumero = new Intl.NumberFormat("es-CO");
- 
-function formatoDecimal(valor) {
-  return valor.toFixed(1).replace(".", ",");
-}
- 
-function formatoPorcentaje(valor) {
-  return `${valor > 0 ? "+" : ""}${formatoDecimal(valor)} %`;
-}
- 
-function formatoMillones(valor) {
-  return `$ ${(valor / 1000000).toLocaleString("es-CO", { maximumFractionDigits: 1 })} M`;
-}
+const moneda = (valor) => formatoMoneda.format(valor);
  
 function normalizar(texto) {
-  return String(texto).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return String(texto).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
  
-/* ---------- 3. CÁLCULOS SOBRE LOS DATOS ---------- */
-function filtrarPorAnio(anio, opciones = {}) {
-  const usarMes = opciones.usarMes !== false;
-  const usarCategoria = opciones.usarCategoria !== false;
- 
-  return transacciones.filter((t) => {
-    const cumpleAnio = t.anio === anio;
-    const cumpleMes = !usarMes || estado.mes === "todos" || t.mes === Number(estado.mes);
-    const cumpleCategoria = !usarCategoria || estado.categoria === "todas" || t.categoria === estado.categoria;
-    return cumpleAnio && cumpleMes && cumpleCategoria;
-  });
-}
- 
-const sumarVentas = (lista) => lista.reduce((acumulado, t) => acumulado + t.total, 0);
-const contarClientes = (lista) => new Set(lista.map((t) => t.cliente)).size;
- 
-function variacion(actual, anterior) {
-  if (anterior === 0) {
-    return actual === 0 ? 0 : 100;
+function crear(etiqueta, clase, texto) {
+  const elemento = document.createElement(etiqueta);
+  if (clase) {
+    elemento.className = clase;
   }
-  return ((actual - anterior) / anterior) * 100;
-}
- 
-function agruparPorMes(lista) {
-  const totales = new Array(12).fill(0);
-  lista.forEach((t) => {
-    totales[t.mes] += t.total;
-  });
-  return totales;
-}
- 
-function agruparPorCategoria(lista) {
-  return CATEGORIAS.map((c) => ({
-    nombre: c.nombre,
-    color: c.color,
-    total: sumarVentas(lista.filter((t) => t.categoria === c.nombre))
-  }));
-}
- 
-function calcularMetricas() {
-  const actual = filtrarPorAnio(ANIO_ACTUAL);
-  const anterior = filtrarPorAnio(ANIO_ANTERIOR);
- 
-  const ventas = sumarVentas(actual);
-  const ventasAnt = sumarVentas(anterior);
-  const pedidos = actual.length;
-  const pedidosAnt = anterior.length;
-  const clientes = contarClientes(actual);
-  const clientesAnt = contarClientes(anterior);
-  const ticket = pedidos > 0 ? ventas / pedidos : 0;
-  const ticketAnt = pedidosAnt > 0 ? ventasAnt / pedidosAnt : 0;
- 
-  const metaVentas = ventasAnt * (1 + META_CRECIMIENTO / 100);
-  const cumplimiento = metaVentas > 0 ? (ventas / metaVentas) * 100 : 0;
- 
-  const porMes = agruparPorMes(filtrarPorAnio(ANIO_ACTUAL, { usarMes: false }));
-  const indiceMejorMes = porMes.indexOf(Math.max(...porMes));
- 
-  const porCategoria = agruparPorCategoria(filtrarPorAnio(ANIO_ACTUAL, { usarCategoria: false }));
-  const totalCategorias = sumarVentas(filtrarPorAnio(ANIO_ACTUAL, { usarCategoria: false }));
-  const lider = porCategoria.reduce((mayor, c) => (c.total > mayor.total ? c : mayor));
- 
-  const pendientes = actual.filter((t) => t.estado === "Pendiente");
- 
-  return {
-    ventas, ventasAnt, pedidos, pedidosAnt, clientes, clientesAnt,
-    ticket, ticketAnt, metaVentas, cumplimiento,
-    crecimiento: variacion(ventas, ventasAnt),
-    mejorMes: { indice: indiceMejorMes, total: porMes[indiceMejorMes] },
-    lider: { nombre: lider.nombre, total: lider.total, participacion: totalCategorias > 0 ? (lider.total / totalCategorias) * 100 : 0 },
-    pendientes: { cantidad: pendientes.length, total: sumarVentas(pendientes) }
-  };
-}
- 
-/* ---------- 4. INDICADORES (TARJETAS) ---------- */
-function mostrarDelta(elemento, valor, unidad, texto) {
-  const signo = valor >= 0 ? "+" : "-";
-  const cifra = formatoDecimal(Math.abs(valor));
-  elemento.className = "delta " + (valor >= 0 ? "up" : "down");
-  elemento.textContent = `${signo}${cifra}${unidad} ${texto}`;
-}
- 
-function actualizarIndicadores() {
-  const m = calcularMetricas();
-  const referencia = `vs ${ANIO_ANTERIOR}`;
- 
-  $("kpiVentas").textContent = formatoMoneda.format(m.ventas);
-  mostrarDelta($("deltaVentas"), variacion(m.ventas, m.ventasAnt), " %", referencia);
- 
-  $("kpiClientes").textContent = formatoNumero.format(m.clientes);
-  mostrarDelta($("deltaClientes"), variacion(m.clientes, m.clientesAnt), " %", referencia);
- 
-  $("kpiPedidos").textContent = formatoNumero.format(m.pedidos);
-  mostrarDelta($("deltaPedidos"), variacion(m.pedidos, m.pedidosAnt), " %", referencia);
- 
-  $("kpiCrecimiento").textContent = formatoPorcentaje(m.crecimiento);
-  $("kpiCrecimiento").className = "kpi-value " + (m.crecimiento >= 0 ? "text-up" : "text-down");
-  mostrarDelta($("deltaCrecimiento"), m.crecimiento - META_CRECIMIENTO, " pp", `vs meta de ${META_CRECIMIENTO} %`);
- 
-  $("cmpTicket").textContent = formatoMoneda.format(m.ticket);
-  mostrarDelta($("deltaTicket"), variacion(m.ticket, m.ticketAnt), " %", referencia);
- 
-  $("cmpMeta").textContent = `${formatoDecimal(m.cumplimiento)} %`;
-  const barra = $("barraMeta");
-  barra.style.width = `${Math.min(100, m.cumplimiento)}%`;
-  barra.classList.toggle("ok", m.cumplimiento >= 100);
-  $("textoMeta").textContent = `Meta: ${formatoMoneda.format(m.metaVentas)}`;
- 
-  $("cmpMes").textContent = MESES[m.mejorMes.indice];
-  $("cmpMesValor").textContent = formatoMoneda.format(m.mejorMes.total);
- 
-  $("cmpCategoria").textContent = m.lider.nombre;
-  $("cmpCategoriaValor").textContent = `${formatoDecimal(m.lider.participacion)} % de las ventas`;
-}
- 
-/* ---------- 5. GRÁFICOS CON CANVAS ---------- */
-const zonasGraficos = { graficoBarras: [], graficoCircular: [], graficoLineas: [] };
- 
-function prepararLienzo(id) {
-  const canvas = $(id);
-  const ratio = window.devicePixelRatio || 1;
-  const ancho = canvas.clientWidth;
-  const alto = canvas.clientHeight;
- 
-  canvas.width = Math.round(ancho * ratio);
-  canvas.height = Math.round(alto * ratio);
- 
-  const ctx = canvas.getContext("2d");
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-  ctx.clearRect(0, 0, ancho, alto);
-  zonasGraficos[id] = [];
- 
-  return { ctx, ancho, alto };
-}
- 
-function maximoRedondeado(valor) {
-  if (valor <= 0) {
-    return 1;
+  if (texto !== undefined) {
+    elemento.textContent = texto;
   }
-  const potencia = Math.pow(10, Math.floor(Math.log10(valor)));
-  const fraccion = valor / potencia;
-  const paso = fraccion <= 1 ? 1 : fraccion <= 2 ? 2 : fraccion <= 5 ? 5 : 10;
-  return paso * potencia;
+  return elemento;
 }
  
-function dibujarCuadricula(ctx, ancho, alto, margen, maximo) {
-  const areaAlto = alto - margen.sup - margen.inf;
-  ctx.font = `12px ${FUENTE}`;
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-  ctx.lineWidth = 1;
+function formatearFecha(iso) {
+  return new Date(iso).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" });
+}
  
-  for (let i = 0; i <= 4; i++) {
-    const y = alto - margen.inf - (areaAlto * i) / 4;
-    ctx.strokeStyle = i === 0 ? "#cbd5e1" : COLORES.linea;
-    ctx.beginPath();
-    ctx.moveTo(margen.izq, y);
-    ctx.lineTo(ancho - margen.der, y);
-    ctx.stroke();
-    ctx.fillStyle = COLORES.texto;
-    ctx.fillText(formatoMillones((maximo * i) / 4), margen.izq - 10, y);
+let temporizadorAviso;
+function mostrarAviso(mensaje, tipo = "") {
+  const aviso = $("aviso");
+  aviso.textContent = mensaje;
+  aviso.className = `toast visible ${tipo}`;
+  clearTimeout(temporizadorAviso);
+  temporizadorAviso = setTimeout(() => aviso.classList.remove("visible"), 3200);
+}
+ 
+/* ---------- 4. PERSISTENCIA CON LOCALSTORAGE ---------- */
+function leerAlmacen(clave, valorPorDefecto) {
+  try {
+    const texto = localStorage.getItem(clave);
+    return texto === null ? valorPorDefecto : JSON.parse(texto);
+  } catch (error) {
+    return valorPorDefecto;
   }
- 
-  ctx.textBaseline = "alphabetic";
 }
  
-function dibujarEtiquetasMeses(ctx, alto, margen, paso) {
-  ctx.font = `12px ${FUENTE}`;
-  ctx.textAlign = "center";
-  ctx.fillStyle = COLORES.texto;
-  MESES_CORTOS.forEach((mes, i) => {
-    ctx.fillText(mes, margen.izq + paso * i + paso / 2, alto - margen.inf + 20);
+function guardarAlmacen(clave, valor) {
+  try {
+    localStorage.setItem(clave, JSON.stringify(valor));
+  } catch (error) {
+    mostrarAviso("No fue posible guardar los datos en LocalStorage.", "error");
+  }
+}
+ 
+function guardarTodo() {
+  guardarAlmacen(CLAVE_PRODUCTOS, productos);
+  guardarAlmacen(CLAVE_VENTAS, ventas);
+}
+ 
+function cargarDatos() {
+  const guardados = leerAlmacen(CLAVE_PRODUCTOS, null);
+  productos = Array.isArray(guardados) ? guardados : PRODUCTOS_EJEMPLO.map((p) => ({ ...p }));
+ 
+  const ventasGuardadas = leerAlmacen(CLAVE_VENTAS, []);
+  ventas = Array.isArray(ventasGuardadas) ? ventasGuardadas : [];
+ 
+  guardarTodo();
+}
+ 
+/* ---------- 5. LÓGICA DE NEGOCIO ---------- */
+const buscarProducto = (id) => productos.find((p) => p.id === Number(id));
+const siguienteIdProducto = () => productos.reduce((mayor, p) => Math.max(mayor, p.id), 0) + 1;
+ 
+function siguienteNumeroVenta() {
+  const mayor = ventas.reduce((m, v) => Math.max(m, Number(String(v.numero).replace(/\D/g, ""))), 0);
+  return `V-${String(mayor + 1).padStart(5, "0")}`;
+}
+ 
+function obtenerEstadoStock(producto) {
+  if (producto.cantidad === 0) {
+    return { texto: "Agotado", clase: "agotado" };
+  }
+  if (producto.cantidad <= UMBRAL_BAJO) {
+    return { texto: "Bajo inventario", clase: "bajo" };
+  }
+  return { texto: "Disponible", clase: "disponible" };
+}
+ 
+function calcularTotales(lineas) {
+  const subtotal = lineas.reduce((suma, l) => suma + l.precio * l.cantidad, 0);
+  const iva = Math.round(subtotal * TASA_IVA);
+  return { subtotal, iva, total: subtotal + iva };
+}
+ 
+function obtenerLineasCarrito() {
+  return carrito
+    .map((item) => {
+      const producto = buscarProducto(item.id);
+      return producto ? { id: producto.id, sku: producto.sku, nombre: producto.nombre, precio: producto.precio, cantidad: item.cantidad } : null;
+    })
+    .filter((linea) => linea !== null);
+}
+ 
+function categoriasDisponibles() {
+  return [...new Set(productos.map((p) => p.categoria))].sort((a, b) => a.localeCompare(b, "es"));
+}
+ 
+function filtrarProductos(filtro) {
+  const texto = normalizar(filtro.texto);
+  return productos.filter((p) => {
+    const coincideTexto = texto === "" || normalizar(p.nombre).includes(texto) || normalizar(p.sku).includes(texto);
+    const coincideCategoria = filtro.categoria === "todas" || p.categoria === filtro.categoria;
+    return coincideTexto && coincideCategoria;
   });
 }
  
-function rectanguloRedondeado(ctx, x, y, ancho, alto, radio) {
-  const r = Math.min(radio, ancho / 2, alto);
-  ctx.beginPath();
-  ctx.moveTo(x, y + alto);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.lineTo(x + ancho - r, y);
-  ctx.quadraticCurveTo(x + ancho, y, x + ancho, y + r);
-  ctx.lineTo(x + ancho, y + alto);
-  ctx.closePath();
-}
- 
-function textoVacio(ctx, ancho, alto) {
-  ctx.fillStyle = COLORES.texto;
-  ctx.font = `14px ${FUENTE}`;
-  ctx.textAlign = "center";
-  ctx.fillText("Sin datos para mostrar", ancho / 2, alto / 2);
-}
- 
-/* 5.1 Gráfico de barras: ventas por mes */
-function dibujarBarras() {
-  const { ctx, ancho, alto } = prepararLienzo("graficoBarras");
-  const datos = agruparPorMes(filtrarPorAnio(ANIO_ACTUAL, { usarMes: false }));
-  const margen = { sup: 16, der: 12, inf: 34, izq: 66 };
-  const maximo = maximoRedondeado(Math.max(...datos));
-  const areaAncho = ancho - margen.izq - margen.der;
-  const areaAlto = alto - margen.sup - margen.inf;
-  const paso = areaAncho / datos.length;
-  const anchoBarra = Math.min(42, paso * 0.62);
- 
-  dibujarCuadricula(ctx, ancho, alto, margen, maximo);
- 
-  datos.forEach((valor, i) => {
-    const alturaBarra = (valor / maximo) * areaAlto;
-    const x = margen.izq + paso * i + (paso - anchoBarra) / 2;
-    const y = alto - margen.inf - alturaBarra;
-    const activo = estado.mes === "todos" || Number(estado.mes) === i;
- 
-    if (alturaBarra > 0.5) {
-      const degradado = ctx.createLinearGradient(0, y, 0, y + alturaBarra);
-      degradado.addColorStop(0, activo ? COLORES.azul : "#c7d2fe");
-      degradado.addColorStop(1, activo ? COLORES.marino : "#e0e7ff");
-      ctx.fillStyle = degradado;
-      rectanguloRedondeado(ctx, x, y, anchoBarra, alturaBarra, 7);
-      ctx.fill();
-    }
- 
-    zonasGraficos.graficoBarras.push({
-      tipo: "rect",
-      x: margen.izq + paso * i,
-      y: margen.sup,
-      ancho: paso,
-      alto: areaAlto,
-      texto: `${MESES[i]} ${ANIO_ACTUAL}\n${formatoMoneda.format(valor)}`
-    });
-  });
- 
-  dibujarEtiquetasMeses(ctx, alto, margen, paso);
-}
- 
-/* 5.2 Gráfico circular (tipo dona): ventas por categoría */
-function dibujarCircular() {
-  const { ctx, ancho, alto } = prepararLienzo("graficoCircular");
-  const datos = agruparPorCategoria(filtrarPorAnio(ANIO_ACTUAL, { usarCategoria: false }));
-  const total = datos.reduce((acumulado, d) => acumulado + d.total, 0);
- 
-  actualizarLeyenda(datos, total);
- 
-  if (total === 0) {
-    textoVacio(ctx, ancho, alto);
+/* ---------- 6. CARRITO ---------- */
+function agregarAlCarrito(id) {
+  const producto = buscarProducto(id);
+  if (!producto) {
+    return;
+  }
+  if (producto.cantidad === 0) {
+    mostrarAviso(`"${producto.nombre}" está agotado.`, "error");
     return;
   }
  
-  const cx = ancho / 2;
-  const cy = alto / 2;
-  const radioExterno = Math.min(ancho, alto) / 2 - 14;
-  const radioInterno = radioExterno * 0.62;
-  let angulo = -Math.PI / 2;
- 
-  datos.forEach((d) => {
-    if (d.total === 0) {
+  const existente = carrito.find((item) => item.id === producto.id);
+  if (existente) {
+    if (existente.cantidad + 1 > producto.cantidad) {
+      mostrarAviso(`Solo hay ${producto.cantidad} unidades disponibles de "${producto.nombre}".`, "error");
       return;
     }
- 
-    const barrido = (d.total / total) * Math.PI * 2;
-    const seleccionada = estado.categoria === d.nombre;
-    const activa = estado.categoria === "todas" || seleccionada;
-    const medio = angulo + barrido / 2;
-    const ox = seleccionada ? Math.cos(medio) * 8 : 0;
-    const oy = seleccionada ? Math.sin(medio) * 8 : 0;
- 
-    ctx.beginPath();
-    ctx.arc(cx + ox, cy + oy, radioExterno, angulo, angulo + barrido);
-    ctx.arc(cx + ox, cy + oy, radioInterno, angulo + barrido, angulo, true);
-    ctx.closePath();
-    ctx.globalAlpha = activa ? 1 : 0.3;
-    ctx.fillStyle = d.color;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 2;
-    ctx.stroke();
- 
-    zonasGraficos.graficoCircular.push({
-      tipo: "sector",
-      cx: cx + ox,
-      cy: cy + oy,
-      rInt: radioInterno,
-      rExt: radioExterno,
-      inicio: angulo,
-      fin: angulo + barrido,
-      texto: `${d.nombre}\n${formatoMoneda.format(d.total)} (${formatoDecimal((d.total / total) * 100)} %)`
-    });
- 
-    angulo += barrido;
-  });
- 
-  ctx.textAlign = "center";
-  ctx.fillStyle = COLORES.texto;
-  ctx.font = `12px ${FUENTE}`;
-  ctx.fillText("Total", cx, cy - 6);
-  ctx.fillStyle = COLORES.marino;
-  ctx.font = `bold 18px ${FUENTE}`;
-  ctx.fillText(formatoMillones(total), cx, cy + 16);
-}
- 
-function actualizarLeyenda(datos, total) {
-  const lista = $("leyendaCategorias");
-  lista.replaceChildren();
- 
-  datos.forEach((d) => {
-    const item = document.createElement("li");
- 
-    const punto = document.createElement("span");
-    punto.className = "dot";
-    punto.style.background = d.color;
- 
-    const nombre = document.createElement("span");
-    nombre.className = "legend-name";
-    nombre.textContent = d.nombre;
- 
-    const porcentaje = document.createElement("strong");
-    porcentaje.textContent = total > 0 ? `${formatoDecimal((d.total / total) * 100)} %` : "0,0 %";
- 
-    item.append(punto, nombre, porcentaje);
-    lista.appendChild(item);
-  });
-}
- 
-/* 5.3 Gráfico de líneas: comparación 2026 frente a 2025 */
-function trazarSerie(ctx, puntos, color, discontinua, conArea, base) {
-  ctx.save();
- 
-  if (conArea) {
-    const minimoY = Math.min(...puntos.map((p) => p.y));
-    const degradado = ctx.createLinearGradient(0, minimoY, 0, base);
-    degradado.addColorStop(0, "rgba(37, 99, 235, 0.28)");
-    degradado.addColorStop(1, "rgba(37, 99, 235, 0)");
-    ctx.beginPath();
-    ctx.moveTo(puntos[0].x, base);
-    puntos.forEach((p) => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(puntos[puntos.length - 1].x, base);
-    ctx.closePath();
-    ctx.fillStyle = degradado;
-    ctx.fill();
-  }
- 
-  ctx.beginPath();
-  puntos.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 3;
-  ctx.lineJoin = "round";
-  ctx.setLineDash(discontinua ? [7, 6] : []);
-  ctx.stroke();
-  ctx.setLineDash([]);
- 
-  puntos.forEach((p) => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-    ctx.lineWidth = 2.5;
-    ctx.strokeStyle = color;
-    ctx.stroke();
-  });
- 
-  ctx.restore();
-}
- 
-function dibujarLineas() {
-  const { ctx, ancho, alto } = prepararLienzo("graficoLineas");
-  const actual = agruparPorMes(filtrarPorAnio(ANIO_ACTUAL, { usarMes: false }));
-  const anterior = agruparPorMes(filtrarPorAnio(ANIO_ANTERIOR, { usarMes: false }));
-  const margen = { sup: 16, der: 20, inf: 34, izq: 66 };
-  const maximo = maximoRedondeado(Math.max(...actual, ...anterior));
-  const areaAncho = ancho - margen.izq - margen.der;
-  const areaAlto = alto - margen.sup - margen.inf;
-  const paso = areaAncho / 12;
-  const base = alto - margen.inf;
- 
-  dibujarCuadricula(ctx, ancho, alto, margen, maximo);
- 
-  if (estado.mes !== "todos") {
-    ctx.fillStyle = "rgba(37, 99, 235, 0.08)";
-    ctx.fillRect(margen.izq + paso * Number(estado.mes), margen.sup, paso, areaAlto);
-  }
- 
-  const aPunto = (valor, i) => ({
-    x: margen.izq + paso * i + paso / 2,
-    y: base - (valor / maximo) * areaAlto
-  });
- 
-  trazarSerie(ctx, anterior.map(aPunto), COLORES.gris, true, false, base);
-  trazarSerie(ctx, actual.map(aPunto), COLORES.azul, false, true, base);
-  dibujarEtiquetasMeses(ctx, alto, margen, paso);
- 
-  actual.forEach((valor, i) => {
-    zonasGraficos.graficoLineas.push({
-      tipo: "rect",
-      x: margen.izq + paso * i,
-      y: margen.sup,
-      ancho: paso,
-      alto: areaAlto,
-      texto: `${MESES[i]}\n${ANIO_ACTUAL}: ${formatoMoneda.format(valor)}\n${ANIO_ANTERIOR}: ${formatoMoneda.format(anterior[i])}\nVariación: ${formatoPorcentaje(variacion(valor, anterior[i]))}`
-    });
-  });
-}
- 
-function dibujarGraficos() {
-  dibujarBarras();
-  dibujarCircular();
-  dibujarLineas();
-}
- 
-/* 5.4 Tooltips (información al pasar el mouse) */
-function estaDentro(zona, x, y) {
-  if (zona.tipo === "rect") {
-    return x >= zona.x && x <= zona.x + zona.ancho && y >= zona.y && y <= zona.y + zona.alto;
-  }
- 
-  const dx = x - zona.cx;
-  const dy = y - zona.cy;
-  const distancia = Math.hypot(dx, dy);
-  if (distancia < zona.rInt || distancia > zona.rExt) {
-    return false;
-  }
- 
-  let angulo = Math.atan2(dy, dx);
-  if (angulo < -Math.PI / 2) {
-    angulo += Math.PI * 2;
-  }
-  return angulo >= zona.inicio && angulo <= zona.fin;
-}
- 
-function configurarTooltips() {
-  const tooltip = $("tooltip");
- 
-  Object.keys(zonasGraficos).forEach((id) => {
-    const canvas = $(id);
- 
-    canvas.addEventListener("mousemove", (evento) => {
-      const caja = canvas.getBoundingClientRect();
-      const x = evento.clientX - caja.left;
-      const y = evento.clientY - caja.top;
-      const zona = zonasGraficos[id].find((z) => estaDentro(z, x, y));
- 
-      if (zona) {
-        tooltip.textContent = zona.texto;
-        tooltip.style.left = `${evento.clientX + 14}px`;
-        tooltip.style.top = `${evento.clientY + 14}px`;
-        tooltip.classList.add("visible");
-        canvas.style.cursor = "pointer";
-      } else {
-        tooltip.classList.remove("visible");
-        canvas.style.cursor = "default";
-      }
-    });
- 
-    canvas.addEventListener("mouseleave", () => tooltip.classList.remove("visible"));
-  });
-}
- 
-/* ---------- 6. TABLA DE TRANSACCIONES ---------- */
-function construirEncabezado() {
-  const fila = $("encabezadoTabla");
-  fila.replaceChildren();
- 
-  COLUMNAS.forEach((columna) => {
-    const th = document.createElement("th");
-    th.scope = "col";
- 
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "sort-btn";
-    boton.dataset.clave = columna.clave;
-    boton.textContent = columna.titulo;
- 
-    th.appendChild(boton);
-    fila.appendChild(th);
-  });
- 
-  fila.addEventListener("click", (evento) => {
-    const boton = evento.target.closest(".sort-btn");
-    if (boton) {
-      ordenarPor(boton.dataset.clave);
-    }
-  });
-}
- 
-function ordenarPor(clave) {
-  if (estado.orden.clave === clave) {
-    estado.orden.direccion = estado.orden.direccion === "asc" ? "desc" : "asc";
+    existente.cantidad += 1;
   } else {
-    estado.orden.clave = clave;
-    estado.orden.direccion = "asc";
+    carrito.push({ id: producto.id, cantidad: 1 });
   }
-  renderizarTabla();
+  renderizarCarrito();
 }
  
-function obtenerFilasTabla() {
-  const termino = normalizar(estado.busqueda.trim());
-  const columna = COLUMNAS.find((c) => c.clave === estado.orden.clave);
-  const factor = estado.orden.direccion === "asc" ? 1 : -1;
- 
-  return filtrarPorAnio(ANIO_ACTUAL)
-    .filter((t) => termino === "" || normalizar(`${t.id} ${t.fecha} ${t.cliente} ${t.categoria} ${t.producto} ${t.estado}`).includes(termino))
-    .sort((a, b) => {
-      if (columna.tipo === "numero") {
-        return (a[columna.clave] - b[columna.clave]) * factor;
-      }
-      return String(a[columna.clave]).localeCompare(String(b[columna.clave]), "es") * factor;
-    });
-}
- 
-function renderizarTabla() {
-  const filas = obtenerFilasTabla();
-  const cuerpo = $("cuerpoTabla");
-  const fragmento = document.createDocumentFragment();
- 
-  filas.forEach((t) => {
-    const tr = document.createElement("tr");
- 
-    COLUMNAS.forEach((columna) => {
-      const td = document.createElement("td");
- 
-      if (columna.clave === "total") {
-        td.textContent = formatoMoneda.format(t.total);
-        td.classList.add("num");
-      } else if (columna.clave === "cantidad") {
-        td.textContent = t.cantidad;
-        td.classList.add("num");
-      } else if (columna.clave === "estado") {
-        const insignia = document.createElement("span");
-        insignia.className = "badge " + (t.estado === "Pagado" ? "badge-ok" : "badge-wait");
-        insignia.textContent = t.estado;
-        td.appendChild(insignia);
-      } else {
-        td.textContent = t[columna.clave];
-      }
- 
-      tr.appendChild(td);
-    });
- 
-    fragmento.appendChild(tr);
-  });
- 
-  if (filas.length === 0) {
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = COLUMNAS.length;
-    td.className = "empty-row";
-    td.textContent = "No se encontraron registros con los filtros actuales.";
-    tr.appendChild(td);
-    fragmento.appendChild(tr);
-  }
- 
-  cuerpo.replaceChildren(fragmento);
- 
-  document.querySelectorAll(".sort-btn").forEach((boton) => {
-    const activo = boton.dataset.clave === estado.orden.clave;
-    boton.dataset.direccion = activo ? estado.orden.direccion : "";
-    boton.parentElement.setAttribute("aria-sort", activo ? (estado.orden.direccion === "asc" ? "ascending" : "descending") : "none");
-  });
- 
-  $("resumenTabla").textContent = `${formatoNumero.format(filas.length)} registros · Total ${formatoMoneda.format(sumarVentas(filas))}`;
-}
- 
-/* ---------- 7. REPORTE EJECUTIVO ---------- */
-function renderizarReporte() {
-  const m = calcularMetricas();
-  const periodo = estado.mes === "todos" ? `Año ${ANIO_ACTUAL}` : `${MESES[Number(estado.mes)]} de ${ANIO_ACTUAL}`;
-  const alcance = estado.categoria === "todas" ? "todas las categorías" : `categoría ${estado.categoria}`;
- 
-  $("reporteTitulo").textContent = `${periodo} · ${alcance}`;
- 
-  const lineas = [
-    `Las ventas totales fueron ${formatoMoneda.format(m.ventas)}, con una variación de ${formatoPorcentaje(m.crecimiento)} frente a ${ANIO_ANTERIOR}.`,
-    `Se registraron ${formatoNumero.format(m.pedidos)} pedidos de ${formatoNumero.format(m.clientes)} clientes distintos.`,
-    `El ticket promedio por pedido fue ${formatoMoneda.format(m.ticket)}.`,
-    `El cumplimiento de la meta de crecimiento (${META_CRECIMIENTO} %) fue de ${formatoDecimal(m.cumplimiento)} %.`,
-    `El mejor mes del año fue ${MESES[m.mejorMes.indice]}, con ${formatoMoneda.format(m.mejorMes.total)}.`,
-    `La categoría líder es ${m.lider.nombre}, con ${formatoDecimal(m.lider.participacion)} % de las ventas.`,
-    `Hay ${formatoNumero.format(m.pendientes.cantidad)} pedidos pendientes de pago por ${formatoMoneda.format(m.pendientes.total)}.`,
-    m.crecimiento >= META_CRECIMIENTO
-      ? "Conclusión: el desempeño supera la meta propuesta; se recomienda mantener la estrategia comercial."
-      : "Conclusión: el desempeño está por debajo de la meta propuesta; se recomienda revisar precios, promociones y cartera pendiente."
-  ];
- 
-  const lista = $("reporteLista");
-  lista.replaceChildren();
-  lineas.forEach((texto) => {
-    const item = document.createElement("li");
-    item.textContent = texto;
-    lista.appendChild(item);
-  });
-}
- 
-/* ---------- 8. EXPORTACIÓN A CSV ---------- */
-function exportarCSV() {
-  const filas = obtenerFilasTabla();
- 
-  if (filas.length === 0) {
-    alert("No hay registros para exportar con los filtros actuales.");
+function cambiarCantidad(id, nuevaCantidad) {
+  const item = carrito.find((i) => i.id === Number(id));
+  const producto = buscarProducto(id);
+  if (!item || !producto) {
     return;
   }
  
-  const escapar = (valor) => `"${String(valor).replace(/"/g, '""')}"`;
-  const lineas = [
-    COLUMNAS.map((c) => escapar(c.titulo)).join(";"),
-    ...filas.map((t) => COLUMNAS.map((c) => escapar(t[c.clave])).join(";"))
-  ];
- 
-  const contenido = "\uFEFF" + lineas.join("\r\n");
-  const blob = new Blob([contenido], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
- 
-  const enlace = document.createElement("a");
-  enlace.href = url;
-  enlace.download = `transacciones_${ANIO_ACTUAL}_${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(enlace);
-  enlace.click();
-  enlace.remove();
-  URL.revokeObjectURL(url);
+  const cantidad = Math.floor(Number(nuevaCantidad));
+  if (!Number.isFinite(cantidad) || cantidad <= 0) {
+    quitarDelCarrito(id);
+    return;
+  }
+  if (cantidad > producto.cantidad) {
+    item.cantidad = producto.cantidad;
+    mostrarAviso(`Existencias insuficientes: máximo ${producto.cantidad} unidades.`, "error");
+  } else {
+    item.cantidad = cantidad;
+  }
+  renderizarCarrito();
 }
  
-/* ---------- 9. FILTROS, NAVEGACIÓN E INICIO ---------- */
-function actualizarTodo() {
-  actualizarIndicadores();
-  dibujarGraficos();
-  renderizarTabla();
-  renderizarReporte();
+function quitarDelCarrito(id) {
+  const indice = carrito.findIndex((i) => i.id === Number(id));
+  if (indice !== -1) {
+    carrito.splice(indice, 1);
+  }
+  renderizarCarrito();
 }
  
-function restablecerFiltros() {
-  estado.mes = "todos";
-  estado.categoria = "todas";
-  estado.busqueda = "";
-  estado.orden = { clave: "fecha", direccion: "desc" };
- 
-  $("filtroMes").value = "todos";
-  $("filtroCategoria").value = "todas";
-  $("buscador").value = "";
- 
-  actualizarTodo();
+function vaciarCarrito() {
+  carrito.length = 0;
+  $("montoRecibido").value = "";
+  renderizarCarrito();
 }
  
-function inicializarFiltros() {
-  const selectorMes = $("filtroMes");
-  const selectorCategoria = $("filtroCategoria");
+function registrarVenta() {
+  if (carrito.length === 0) {
+    mostrarAviso("Agregue al menos un producto al carrito.", "error");
+    return;
+  }
  
-  selectorMes.add(new Option("Todos los meses", "todos"));
-  MESES.forEach((mes, i) => selectorMes.add(new Option(mes, String(i))));
+  // Validación final de existencias antes de confirmar la venta
+  for (const item of carrito) {
+    const producto = buscarProducto(item.id);
+    if (!producto || item.cantidad > producto.cantidad) {
+      mostrarAviso("Las existencias cambiaron. Revise las cantidades del carrito.", "error");
+      renderizarTodo();
+      return;
+    }
+  }
  
-  selectorCategoria.add(new Option("Todas las categorías", "todas"));
-  CATEGORIAS.forEach((c) => selectorCategoria.add(new Option(c.nombre, c.nombre)));
+  const lineas = obtenerLineasCarrito();
+  const totales = calcularTotales(lineas);
+  const metodo = $("metodoPago").value;
+  const recibido = metodo === "Efectivo" ? Number($("montoRecibido").value) : totales.total;
  
-  selectorMes.addEventListener("change", () => {
-    estado.mes = selectorMes.value;
-    actualizarTodo();
-  });
+  if (metodo === "Efectivo" && !(recibido >= totales.total)) {
+    mostrarAviso("El efectivo recibido es menor al total de la venta.", "error");
+    return;
+  }
  
-  selectorCategoria.addEventListener("change", () => {
-    estado.categoria = selectorCategoria.value;
-    actualizarTodo();
-  });
- 
-  $("buscador").addEventListener("input", (evento) => {
-    estado.busqueda = evento.target.value;
-    renderizarTabla();
-  });
- 
-  $("btnReset").addEventListener("click", restablecerFiltros);
-  $("btnImprimir").addEventListener("click", () => window.print());
-  document.querySelectorAll(".js-exportar").forEach((boton) => boton.addEventListener("click", exportarCSV));
-}
- 
-function inicializarNavegacion() {
-  const menu = $("sidebar");
-  const capa = $("overlay");
-  const enlaces = document.querySelectorAll(".menu-link");
- 
-  const alternarMenu = (abrir) => {
-    menu.classList.toggle("open", abrir);
-    capa.classList.toggle("visible", abrir);
+  const venta = {
+    numero: siguienteNumeroVenta(),
+    fecha: new Date().toISOString(),
+    lineas: lineas,
+    subtotal: totales.subtotal,
+    iva: totales.iva,
+    total: totales.total,
+    metodo: metodo,
+    recibido: recibido,
+    cambio: recibido - totales.total
   };
  
-  $("btnMenu").addEventListener("click", () => alternarMenu(!menu.classList.contains("open")));
-  capa.addEventListener("click", () => alternarMenu(false));
-  enlaces.forEach((enlace) => enlace.addEventListener("click", () => alternarMenu(false)));
+  // Descuento del inventario
+  lineas.forEach((linea) => {
+    buscarProducto(linea.id).cantidad -= linea.cantidad;
+  });
  
-  const observador = new IntersectionObserver(
-    (entradas) => {
-      entradas.forEach((entrada) => {
-        if (entrada.isIntersecting) {
-          enlaces.forEach((enlace) => {
-            enlace.classList.toggle("active", enlace.getAttribute("href") === `#${entrada.target.id}`);
-          });
-        }
-      });
-    },
-    { rootMargin: "-30% 0px -60% 0px" }
-  );
+  ventas.push(venta);
+  guardarTodo();
  
-  document.querySelectorAll(".section").forEach((seccion) => observador.observe(seccion));
+  carrito.length = 0;
+  $("montoRecibido").value = "";
+  renderizarTodo();
+  mostrarAviso(`Venta ${venta.numero} registrada correctamente.`, "exito");
+  abrirComprobante(venta);
 }
  
-function mostrarFecha() {
-  const texto = new Date().toLocaleDateString("es-CO", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  $("fechaActual").textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+/* ---------- 7. PRODUCTOS (CREAR, EDITAR, ELIMINAR) ---------- */
+function limpiarFormulario() {
+  $("formProducto").reset();
+  $("prodId").value = "";
+  $("tituloFormulario").textContent = "Registrar producto";
+  $("btnGuardarProducto").textContent = "Guardar producto";
+  $("mensajeForm").textContent = "";
+}
+ 
+function validarProducto(datos) {
+  if (datos.nombre === "") {
+    return "El nombre del producto es obligatorio.";
+  }
+  if (datos.sku === "") {
+    return "El código o SKU es obligatorio.";
+  }
+  const duplicado = productos.some((p) => normalizar(p.sku) === normalizar(datos.sku) && p.id !== datos.id);
+  if (duplicado) {
+    return "Ya existe un producto con ese código o SKU.";
+  }
+  if (datos.categoria === "") {
+    return "La categoría es obligatoria.";
+  }
+  if (!Number.isFinite(datos.precio) || datos.precio <= 0) {
+    return "El precio debe ser un número mayor que cero.";
+  }
+  if (!Number.isInteger(datos.cantidad) || datos.cantidad < 0) {
+    return "La cantidad debe ser un número entero igual o mayor que cero.";
+  }
+  return "";
+}
+ 
+function guardarProducto(evento) {
+  evento.preventDefault();
+ 
+  const idActual = $("prodId").value;
+  const datos = {
+    id: idActual === "" ? 0 : Number(idActual),
+    nombre: $("prodNombre").value.trim(),
+    sku: $("prodSku").value.trim().toUpperCase(),
+    categoria: $("prodCategoria").value.trim(),
+    precio: Number($("prodPrecio").value),
+    cantidad: Number($("prodCantidad").value)
+  };
+ 
+  const error = validarProducto(datos);
+  if (error !== "") {
+    $("mensajeForm").textContent = error;
+    return;
+  }
+ 
+  if (idActual === "") {
+    datos.id = siguienteIdProducto();
+    productos.push(datos);
+    mostrarAviso(`Producto "${datos.nombre}" registrado.`, "exito");
+  } else {
+    const producto = buscarProducto(idActual);
+    Object.assign(producto, datos);
+    mostrarAviso(`Producto "${datos.nombre}" actualizado.`, "exito");
+  }
+ 
+  guardarTodo();
+  limpiarFormulario();
+  renderizarTodo();
+}
+ 
+function editarProducto(id) {
+  const producto = buscarProducto(id);
+  if (!producto) {
+    return;
+  }
+  $("prodId").value = producto.id;
+  $("prodNombre").value = producto.nombre;
+  $("prodSku").value = producto.sku;
+  $("prodCategoria").value = producto.categoria;
+  $("prodPrecio").value = producto.precio;
+  $("prodCantidad").value = producto.cantidad;
+  $("tituloFormulario").textContent = `Editar producto: ${producto.nombre}`;
+  $("btnGuardarProducto").textContent = "Actualizar producto";
+  $("mensajeForm").textContent = "";
+  $("formProducto").scrollIntoView({ behavior: "smooth", block: "center" });
+  $("prodNombre").focus();
+}
+ 
+function eliminarProducto(id) {
+  const producto = buscarProducto(id);
+  if (!producto) {
+    return;
+  }
+  if (!confirm(`¿Eliminar el producto "${producto.nombre}" del inventario?`)) {
+    return;
+  }
+ 
+  productos = productos.filter((p) => p.id !== producto.id);
+  const indiceCarrito = carrito.findIndex((i) => i.id === producto.id);
+  if (indiceCarrito !== -1) {
+    carrito.splice(indiceCarrito, 1);
+  }
+  if ($("prodId").value === String(producto.id)) {
+    limpiarFormulario();
+  }
+ 
+  guardarTodo();
+  renderizarTodo();
+  mostrarAviso("Producto eliminado.", "exito");
+}
+ 
+function restaurarDatos() {
+  if (!confirm("Se borrarán los productos y las ventas actuales y se cargarán los datos de ejemplo. ¿Continuar?")) {
+    return;
+  }
+  productos = PRODUCTOS_EJEMPLO.map((p) => ({ ...p }));
+  ventas = [];
+  carrito.length = 0;
+  guardarTodo();
+  limpiarFormulario();
+  renderizarTodo();
+  mostrarAviso("Datos de ejemplo restaurados.", "exito");
+}
+ 
+/* ---------- 8. RENDERIZADO DE VISTAS ---------- */
+function llenarSelectCategorias(select, valorActual) {
+  select.replaceChildren();
+  select.add(new Option("Todas las categorías", "todas"));
+  categoriasDisponibles().forEach((categoria) => select.add(new Option(categoria, categoria)));
+  select.value = categoriasDisponibles().includes(valorActual) ? valorActual : "todas";
+}
+ 
+function renderizarCategorias() {
+  filtros.catalogo.categoria = llenarSelectYDevolver($("filtroCategoriaCatalogo"), filtros.catalogo.categoria);
+  filtros.inventario.categoria = llenarSelectYDevolver($("filtroCategoriaInventario"), filtros.inventario.categoria);
+ 
+  const lista = $("listaCategorias");
+  lista.replaceChildren();
+  categoriasDisponibles().forEach((categoria) => lista.appendChild(new Option(categoria)));
+}
+ 
+function llenarSelectYDevolver(select, valorActual) {
+  llenarSelectCategorias(select, valorActual);
+  return select.value;
+}
+ 
+function renderizarDashboard() {
+  const acumulado = ventas.reduce((suma, v) => suma + v.total, 0);
+  const bajos = productos.filter((p) => p.cantidad <= UMBRAL_BAJO).sort((a, b) => a.cantidad - b.cantidad);
+ 
+  $("kpiProductos").textContent = productos.length;
+  $("kpiVentas").textContent = ventas.length;
+  $("kpiAcumulado").textContent = moneda(acumulado);
+  $("kpiBajo").textContent = bajos.length;
+ 
+  const listaBajo = $("listaBajo");
+  listaBajo.replaceChildren();
+  if (bajos.length === 0) {
+    listaBajo.appendChild(crear("li", "", "Todos los productos tienen existencias suficientes."));
+  }
+  bajos.forEach((p) => {
+    const item = crear("li");
+    item.appendChild(crear("span", "", p.nombre));
+    const estado = obtenerEstadoStock(p);
+    item.appendChild(crear("span", `etiqueta-estado ${estado.clase}`, `${estado.texto}: ${p.cantidad}`));
+    listaBajo.appendChild(item);
+  });
+ 
+  const cuerpo = $("ultimasVentas");
+  cuerpo.replaceChildren();
+  const ultimas = ventas.slice(-5).reverse();
+  if (ultimas.length === 0) {
+    const fila = crear("tr");
+    const celda = crear("td", "fila-vacia", "Aún no se han registrado ventas.");
+    celda.colSpan = 4;
+    fila.appendChild(celda);
+    cuerpo.appendChild(fila);
+  }
+  ultimas.forEach((v) => {
+    const fila = crear("tr");
+    fila.append(crear("td", "", v.numero), crear("td", "", formatearFecha(v.fecha)), crear("td", "", v.metodo), crear("td", "num", moneda(v.total)));
+    cuerpo.appendChild(fila);
+  });
+}
+ 
+function renderizarCatalogo() {
+  const contenedor = $("catalogo");
+  contenedor.replaceChildren();
+  const lista = filtrarProductos(filtros.catalogo);
+ 
+  if (lista.length === 0) {
+    contenedor.appendChild(crear("p", "muted", "No se encontraron productos."));
+    return;
+  }
+ 
+  lista.forEach((p) => {
+    const tarjeta = crear("article", "producto-card");
+    const estado = obtenerEstadoStock(p);
+ 
+    tarjeta.appendChild(crear("h3", "", p.nombre));
+    tarjeta.appendChild(crear("small", "", `${p.sku} · ${p.categoria}`));
+    tarjeta.appendChild(crear("strong", "precio", moneda(p.precio)));
+    tarjeta.appendChild(crear("span", `etiqueta-estado ${estado.clase}`, `${estado.texto} (${p.cantidad})`));
+ 
+    const boton = crear("button", "btn btn-azul", p.cantidad === 0 ? "Sin existencias" : "Agregar al carrito");
+    boton.type = "button";
+    boton.dataset.accion = "agregar";
+    boton.dataset.id = p.id;
+    boton.disabled = p.cantidad === 0;
+    tarjeta.appendChild(boton);
+ 
+    contenedor.appendChild(tarjeta);
+  });
+}
+ 
+function crearBotonCantidad(texto, accion, id) {
+  const boton = crear("button", "", texto);
+  boton.type = "button";
+  boton.dataset.accion = accion;
+  boton.dataset.id = id;
+  return boton;
+}
+ 
+function renderizarCarrito() {
+  const lista = $("listaCarrito");
+  lista.replaceChildren();
+  const lineas = obtenerLineasCarrito();
+ 
+  if (lineas.length === 0) {
+    lista.appendChild(crear("li", "vacio", "El carrito está vacío."));
+  }
+ 
+  lineas.forEach((linea) => {
+    const item = crear("li", "item-carrito");
+ 
+    const fila = crear("div", "fila");
+    fila.appendChild(crear("span", "nombre", linea.nombre));
+    const quitar = crear("button", "btn btn-rojo btn-pequeno", "Quitar");
+    quitar.type = "button";
+    quitar.dataset.accion = "quitar";
+    quitar.dataset.id = linea.id;
+    fila.appendChild(quitar);
+    item.appendChild(fila);
+    item.appendChild(crear("small", "muted", `${moneda(linea.precio)} c/u`));
+ 
+    const control = crear("div", "control-cantidad");
+    const entrada = crear("input");
+    entrada.type = "number";
+    entrada.min = "1";
+    entrada.value = linea.cantidad;
+    entrada.dataset.accion = "cantidad";
+    entrada.dataset.id = linea.id;
+    entrada.setAttribute("aria-label", `Cantidad de ${linea.nombre}`);
+    control.append(
+      crearBotonCantidad("-", "menos", linea.id),
+      entrada,
+      crearBotonCantidad("+", "mas", linea.id),
+      crear("span", "subtotal-item", moneda(linea.precio * linea.cantidad))
+    );
+    item.appendChild(control);
+ 
+    lista.appendChild(item);
+  });
+ 
+  const totales = calcularTotales(lineas);
+  $("resSubtotal").textContent = moneda(totales.subtotal);
+  $("resIva").textContent = moneda(totales.iva);
+  $("resTotal").textContent = moneda(totales.total);
+  $("btnRegistrar").disabled = lineas.length === 0;
+  actualizarCambio();
+}
+ 
+function actualizarCambio() {
+  const esEfectivo = $("metodoPago").value === "Efectivo";
+  $("campoEfectivo").style.display = esEfectivo ? "block" : "none";
+ 
+  const totales = calcularTotales(obtenerLineasCarrito());
+  const recibido = Number($("montoRecibido").value);
+  const cambio = recibido > totales.total ? recibido - totales.total : 0;
+  $("resCambio").textContent = moneda(cambio);
+}
+ 
+function renderizarInventario() {
+  const cuerpo = $("cuerpoInventario");
+  cuerpo.replaceChildren();
+  const lista = filtrarProductos(filtros.inventario);
+ 
+  $("resumenInventario").textContent = `${lista.length} de ${productos.length} productos · ${productos.reduce((s, p) => s + p.cantidad, 0)} unidades en existencia`;
+ 
+  if (lista.length === 0) {
+    const fila = crear("tr");
+    const celda = crear("td", "fila-vacia", "No se encontraron productos con los filtros actuales.");
+    celda.colSpan = 7;
+    fila.appendChild(celda);
+    cuerpo.appendChild(fila);
+    return;
+  }
+ 
+  lista.forEach((p) => {
+    const fila = crear("tr");
+    const estado = obtenerEstadoStock(p);
+ 
+    const acciones = crear("div", "acciones-tabla");
+    const editar = crear("button", "btn btn-gris btn-pequeno", "Editar");
+    editar.type = "button";
+    editar.dataset.accion = "editar";
+    editar.dataset.id = p.id;
+    const eliminar = crear("button", "btn btn-rojo btn-pequeno", "Eliminar");
+    eliminar.type = "button";
+    eliminar.dataset.accion = "eliminar";
+    eliminar.dataset.id = p.id;
+    acciones.append(editar, eliminar);
+ 
+    const celdaEstado = crear("td");
+    celdaEstado.appendChild(crear("span", `etiqueta-estado ${estado.clase}`, estado.texto));
+    const celdaAcciones = crear("td");
+    celdaAcciones.appendChild(acciones);
+ 
+    fila.append(
+      crear("td", "", p.sku),
+      crear("td", "", p.nombre),
+      crear("td", "", p.categoria),
+      crear("td", "num", moneda(p.precio)),
+      crear("td", "num", p.cantidad),
+      celdaEstado,
+      celdaAcciones
+    );
+    cuerpo.appendChild(fila);
+  });
+}
+ 
+function renderizarHistorial() {
+  const cuerpo = $("cuerpoHistorial");
+  cuerpo.replaceChildren();
+ 
+  if (ventas.length === 0) {
+    const fila = crear("tr");
+    const celda = crear("td", "fila-vacia", "Aún no se han registrado ventas.");
+    celda.colSpan = 8;
+    fila.appendChild(celda);
+    cuerpo.appendChild(fila);
+    return;
+  }
+ 
+  ventas.slice().reverse().forEach((v) => {
+    const fila = crear("tr");
+    const boton = crear("button", "btn btn-azul btn-pequeno", "Ver comprobante");
+    boton.type = "button";
+    boton.dataset.accion = "ver";
+    boton.dataset.numero = v.numero;
+    const celdaBoton = crear("td");
+    celdaBoton.appendChild(boton);
+ 
+    fila.append(
+      crear("td", "", v.numero),
+      crear("td", "", formatearFecha(v.fecha)),
+      crear("td", "", v.metodo),
+      crear("td", "num", v.lineas.reduce((s, l) => s + l.cantidad, 0)),
+      crear("td", "num", moneda(v.subtotal)),
+      crear("td", "num", moneda(v.iva)),
+      crear("td", "num", moneda(v.total)),
+      celdaBoton
+    );
+    cuerpo.appendChild(fila);
+  });
+}
+ 
+function renderizarTodo() {
+  renderizarCategorias();
+  renderizarDashboard();
+  renderizarCatalogo();
+  renderizarCarrito();
+  renderizarInventario();
+  renderizarHistorial();
+}
+ 
+/* ---------- 9. COMPROBANTE DE VENTA ---------- */
+function crearLineaTotal(etiqueta, valor, clase = "") {
+  const linea = crear("div", `linea-total ${clase}`);
+  linea.append(crear("span", "", etiqueta), crear("span", "", valor));
+  return linea;
+}
+ 
+function abrirComprobante(venta) {
+  const contenido = $("comprobanteContenido");
+  contenido.replaceChildren();
+ 
+  const encabezado = crear("div", "centro");
+  encabezado.append(
+    crear("h2", "", "POS ACADÉMICO"),
+    crear("div", "", "Universidad de Caldas"),
+    crear("div", "", "Programación Web Creativa II"),
+    crear("div", "", "NIT 900.000.000-0 (ficticio)")
+  );
+ 
+  const datos = crear("div", "datos");
+  [["Comprobante N.º", venta.numero], ["Fecha", formatearFecha(venta.fecha)], ["Método de pago", venta.metodo]].forEach(([etiqueta, valor]) => {
+    const fila = crear("div");
+    fila.append(crear("span", "", etiqueta), crear("strong", "", valor));
+    datos.appendChild(fila);
+  });
+ 
+  const tabla = crear("table");
+  const cabecera = crear("thead");
+  const filaCabecera = crear("tr");
+  ["Producto", "Cant.", "P. unit.", "Total"].forEach((titulo, i) => filaCabecera.appendChild(crear("th", i === 0 ? "" : "num", titulo)));
+  cabecera.appendChild(filaCabecera);
+  tabla.appendChild(cabecera);
+ 
+  const cuerpo = crear("tbody");
+  venta.lineas.forEach((l) => {
+    const fila = crear("tr");
+    fila.append(
+      crear("td", "", l.nombre),
+      crear("td", "num", l.cantidad),
+      crear("td", "num", moneda(l.precio)),
+      crear("td", "num", moneda(l.precio * l.cantidad))
+    );
+    cuerpo.appendChild(fila);
+  });
+  tabla.appendChild(cuerpo);
+ 
+  const totales = crear("div", "totales-comprobante");
+  totales.append(
+    crearLineaTotal("Subtotal", moneda(venta.subtotal)),
+    crearLineaTotal("IVA (19 %)", moneda(venta.iva)),
+    crearLineaTotal("TOTAL", moneda(venta.total), "grande")
+  );
+  if (venta.metodo === "Efectivo") {
+    totales.append(crearLineaTotal("Efectivo recibido", moneda(venta.recibido)), crearLineaTotal("Cambio", moneda(venta.cambio)));
+  }
+ 
+  const nota = crear("p", "nota", "Comprobante simulado con fines académicos. Sin validez fiscal. ¡Gracias por su compra!");
+ 
+  contenido.append(encabezado, datos, tabla, totales, nota);
+ 
+  $("modalComprobante").classList.add("abierto");
+  $("btnImprimir").focus();
+}
+ 
+function cerrarComprobante() {
+  $("modalComprobante").classList.remove("abierto");
+}
+ 
+/* ---------- 10. NAVEGACIÓN ---------- */
+function cambiarVista(nombre) {
+  document.querySelectorAll(".vista").forEach((vista) => vista.classList.toggle("activa", vista.id === `vista-${nombre}`));
+  document.querySelectorAll(".menu-link").forEach((boton) => boton.classList.toggle("active", boton.dataset.vista === nombre));
+  $("tituloVista").textContent = TITULOS_VISTA[nombre];
+  alternarMenu(false);
+  window.scrollTo({ top: 0 });
+}
+ 
+function alternarMenu(abrir) {
+  $("sidebar").classList.toggle("open", abrir);
+  $("overlay").classList.toggle("visible", abrir);
+}
+ 
+/* ---------- 11. EVENTOS E INICIO ---------- */
+function registrarEventos() {
+  document.querySelectorAll(".menu-link").forEach((boton) => boton.addEventListener("click", () => cambiarVista(boton.dataset.vista)));
+  $("btnMenu").addEventListener("click", () => alternarMenu(!$("sidebar").classList.contains("open")));
+  $("overlay").addEventListener("click", () => alternarMenu(false));
+ 
+  // Catálogo
+  $("buscadorCatalogo").addEventListener("input", (e) => {
+    filtros.catalogo.texto = e.target.value;
+    renderizarCatalogo();
+  });
+  $("filtroCategoriaCatalogo").addEventListener("change", (e) => {
+    filtros.catalogo.categoria = e.target.value;
+    renderizarCatalogo();
+  });
+  $("catalogo").addEventListener("click", (e) => {
+    const boton = e.target.closest("[data-accion='agregar']");
+    if (boton) {
+      agregarAlCarrito(boton.dataset.id);
+    }
+  });
+ 
+  // Carrito
+  $("listaCarrito").addEventListener("click", (e) => {
+    const boton = e.target.closest("button[data-accion]");
+    if (!boton) {
+      return;
+    }
+    const item = carrito.find((i) => i.id === Number(boton.dataset.id));
+    if (boton.dataset.accion === "quitar") {
+      quitarDelCarrito(boton.dataset.id);
+    } else if (boton.dataset.accion === "mas" && item) {
+      cambiarCantidad(boton.dataset.id, item.cantidad + 1);
+    } else if (boton.dataset.accion === "menos" && item) {
+      cambiarCantidad(boton.dataset.id, item.cantidad - 1);
+    }
+  });
+  $("listaCarrito").addEventListener("change", (e) => {
+    if (e.target.dataset.accion === "cantidad") {
+      cambiarCantidad(e.target.dataset.id, e.target.value);
+    }
+  });
+  $("metodoPago").addEventListener("change", actualizarCambio);
+  $("montoRecibido").addEventListener("input", actualizarCambio);
+  $("btnRegistrar").addEventListener("click", registrarVenta);
+  $("btnVaciar").addEventListener("click", vaciarCarrito);
+ 
+  // Productos e inventario
+  $("formProducto").addEventListener("submit", guardarProducto);
+  $("btnCancelarEdicion").addEventListener("click", limpiarFormulario);
+  $("buscadorInventario").addEventListener("input", (e) => {
+    filtros.inventario.texto = e.target.value;
+    renderizarInventario();
+  });
+  $("filtroCategoriaInventario").addEventListener("change", (e) => {
+    filtros.inventario.categoria = e.target.value;
+    renderizarInventario();
+  });
+  $("btnRestaurar").addEventListener("click", restaurarDatos);
+  $("cuerpoInventario").addEventListener("click", (e) => {
+    const boton = e.target.closest("button[data-accion]");
+    if (!boton) {
+      return;
+    }
+    if (boton.dataset.accion === "editar") {
+      editarProducto(boton.dataset.id);
+    } else if (boton.dataset.accion === "eliminar") {
+      eliminarProducto(boton.dataset.id);
+    }
+  });
+ 
+  // Comprobantes
+  $("cuerpoHistorial").addEventListener("click", (e) => {
+    const boton = e.target.closest("[data-accion='ver']");
+    if (boton) {
+      abrirComprobante(ventas.find((v) => v.numero === boton.dataset.numero));
+    }
+  });
+  $("btnImprimir").addEventListener("click", () => window.print());
+  $("btnCerrarModal").addEventListener("click", cerrarComprobante);
+  $("modalComprobante").addEventListener("click", (e) => {
+    if (e.target === $("modalComprobante")) {
+      cerrarComprobante();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      cerrarComprobante();
+    }
+  });
 }
  
 function iniciar() {
-  mostrarFecha();
-  inicializarFiltros();
-  inicializarNavegacion();
-  construirEncabezado();
-  configurarTooltips();
-  actualizarTodo();
+  const fecha = new Date().toLocaleDateString("es-CO", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  $("fechaActual").textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
  
-  let temporizador;
-  window.addEventListener("resize", () => {
-    clearTimeout(temporizador);
-    temporizador = setTimeout(dibujarGraficos, 150);
-  });
+  const selectorPago = $("metodoPago");
+  METODOS_PAGO.forEach((metodo) => selectorPago.add(new Option(metodo, metodo)));
+ 
+  cargarDatos();
+  registrarEventos();
+  renderizarTodo();
 }
  
 document.addEventListener("DOMContentLoaded", iniciar);
