@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller 29: Gestión de Proyectos</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="inst">
+ <b>UNIVERSIDAD DE CALDAS</b>
+ <span>Asignatura: Programación Web Creativa II</span>
+ <span>Docente: Andrés Felipe Osorio Quintero</span>
+ <span>Taller 29: Gestión de Proyectos</span>
+</header>
+<nav>
+ <b class="logo">📋 TableroCaldas</b>
+ <button id="back" data-back="1" hidden>← Mis tableros</button>
+</nav>
+<main>
+<section id="home">
+ <h2>Panel de proyectos</h2>
+ <form id="nb" class="bar">
+  <input name="n" placeholder="Nombre del nuevo tablero" required>
+  <button>Crear tablero</button>
+ </form>
+ <div id="boards" class="grid"></div>
+</section>
+<section id="board" hidden>
+ <h2 id="bt"></h2>
+ <div class="bar">
+  <input id="q" placeholder="Buscar por título o responsable...">
+  <select id="fp">
+   <option value="">Todas las prioridades</option>
+   <option>Alta</option><option>Media</option><option>Baja</option>
+  </select>
+  <form id="nc" class="bar">
+   <input name="n" placeholder="Nueva columna" required>
+   <button>+ Columna</button>
+  </form>
+ </div>
+ <div id="cols"></div>
+</section>
+</main>
+<div id="m" class="modal" hidden>
+ <form id="cf">
+  <h3>Tarjeta</h3>
+  <input name="t" placeholder="Título de la tarea" required>
+  <input name="who" placeholder="Responsable">
+  <input name="due" type="date">
+  <select name="p">
+   <option>Alta</option><option>Media</option><option>Baja</option>
+  </select>
+  <div><button>Guardar</button>
+  <button type="button" data-cancel="1">Cancelar</button></div>
+ </form>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
