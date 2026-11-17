@@ -1,0 +1,53 @@
+ index.html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StreamCaldas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1 class="logo">STREAM<span>CALDAS</span></h1>
+    <nav>
+      <button class="nav-btn active" data-view="all">Inicio</button>
+      <button class="nav-btn" data-view="Película">Películas</button>
+      <button class="nav-btn" data-view="Serie">Series</button>
+      <button class="nav-btn" data-view="fav">Mis favoritos</button>
+    </nav>
+    <input id="search" type="search" placeholder="Buscar títulos...">
+  </header>
+  <section class="hero">
+    <h2>Explora, busca y guarda tus favoritos</h2>
+    <p>Catálogo de demostración de películas y series.</p>
+  </section>
+  <div class="cats">
+    <button class="cat active" data-genre="all">Todos</button>
+    <button class="cat" data-genre="accion">Acción</button>
+    <button class="cat" data-genre="comedia">Comedia</button>
+    <button class="cat" data-genre="drama">Drama</button>
+    <button class="cat" data-genre="terror">Terror</button>
+    <button class="cat" data-genre="scifi">Ciencia ficción</button>
+  </div>
+  <main>
+    <h3>Catálogo</h3>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" hidden>Sin resultados.</p>
+  </main>
+  <div class="modal" id="modal">
+    <div class="box">
+      <button class="close" id="close">X</button>
+      <video id="player" controls playsinline></video>
+      <div class="info">
+        <h2 id="m-title"></h2>
+        <p id="m-meta"></p>
+        <p id="m-desc"></p>
+        <button class="btn" id="m-fav"></button>
+      </div>
+    </div>
+  </div>
+  <footer>Taller 25 · Universidad de Caldas · Programación Web Creativa II</footer>
+  <script src="script.js"></script>
+</body>
+</html>
