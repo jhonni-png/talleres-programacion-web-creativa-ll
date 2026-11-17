@@ -1,0 +1,51 @@
+*{box-sizing:border-box;margin:0;font-family:Arial,sans-serif}
+body{background:#f6f6f6;color:#222}
+[hidden]{display:none!important}
+.inst{background:#111;color:#fff;padding:6px 16px;font-size:12px;
+ display:flex;flex-wrap:wrap;gap:4px 20px}
+nav{background:#06c167;display:flex;gap:6px;padding:8px 16px;
+ position:sticky;top:0;align-items:center;z-index:5}
+.logo{font-size:20px;margin-right:auto}
+nav button{background:none;border:0;padding:8px 14px;
+ border-radius:20px;font-size:15px}
+nav button:hover{background:#fff}
+main{max-width:1000px;margin:auto;padding:16px}
+h2{margin:10px 0}
+.hero{text-align:center;padding:60px 12px;border-radius:16px;
+ background:linear-gradient(135deg,#d4f7e5,#fff3c4)}
+.hero h1{font-size:2.3em;margin-bottom:10px}
+.hero p{margin-bottom:18px}
+button{cursor:pointer;font-size:14px}
+.btn,.card button,.row button,form button{background:#111;
+ color:#fff;border:0;border-radius:8px;padding:8px 14px}
+#q,form input,form textarea{width:100%;padding:10px;
+ border:1px solid #bbb;border-radius:8px;margin:6px 0}
+.chip{background:#fff;border:1px solid #bbb;border-radius:20px;
+ padding:6px 14px;margin:2px}
+.chip.on{background:#06c167;color:#fff;border-color:#06c167}
+.grid{display:grid;gap:14px;margin-top:12px;
+ grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.card{background:#fff;border-radius:12px;padding:12px;gap:6px;
+ box-shadow:0 2px 6px #0002;display:flex;flex-direction:column}
+article.card{cursor:pointer;transition:transform .2s}
+article.card:hover{transform:translateY(-4px)}
+.img{height:110px;border-radius:10px;display:grid;
+ place-items:center;font-size:56px}
+.row{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;
+ align-items:center;background:#fff;padding:10px;margin:6px 0;
+ border-radius:10px}
+.row small{display:block;color:#777}
+#tot{text-align:right;line-height:1.7;margin:10px 0}
+form{background:#fff;padding:14px;border-radius:12px}
+.steps{display:flex;list-style:none;gap:6px;margin:14px 0}
+.steps li{flex:1;text-align:center;padding:8px;background:#ddd;
+ border-radius:8px;font-size:13px}
+.steps li.ok{background:#06c167;color:#fff}
+.road{position:relative;height:40px;font-size:28px;
+ border-bottom:3px dashed #999;margin-bottom:12px}
+.road span{position:absolute;transition:left 1s linear}
+.road i{position:absolute;right:0;font-style:normal}
+.tag{padding:2px 8px;border-radius:10px;background:#ffe08a;
+ font-size:12px}
+.tag.s3{background:#06c167;color:#fff}
+@media(max-width:600px){.row{grid-template-columns:1fr 1fr}}

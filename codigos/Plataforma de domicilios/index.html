@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller 28: Plataforma de Domicilios</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="inst">
+ <b>UNIVERSIDAD DE CALDAS</b>
+ <span>Asignatura: Programación Web Creativa II</span>
+ <span>Docente: Andrés Felipe Osorio Quintero</span>
+ <span>Taller 28: Plataforma de Domicilios</span>
+</header>
+<nav>
+ <b class="logo">🛵 DomiCaldas</b>
+ <button data-v="inicio">Inicio</button>
+ <button data-v="catalogo">Restaurantes</button>
+ <button data-v="carrito">Carrito (<span id="cnt">0</span>)</button>
+ <button data-v="historial">Pedidos</button>
+</nav>
+<main>
+<section id="inicio" class="view hero">
+ <h1>¿Qué quieres comer hoy?</h1>
+ <p>Explora restaurantes, arma tu carrito y sigue tu domicilio.</p>
+ <button class="btn" data-v="catalogo">Ver restaurantes</button>
+</section>
+<section id="catalogo" class="view" hidden>
+ <h2>Restaurantes</h2>
+ <input id="q" placeholder="Buscar restaurante, plato o categoría...">
+ <div id="filtros"></div>
+ <div id="rests" class="grid"></div>
+</section>
+<section id="menu" class="view" hidden>
+ <button class="btn" data-v="catalogo">← Restaurantes</button>
+ <h2 id="mt"></h2>
+ <p id="md"></p>
+ <div id="prods" class="grid"></div>
+</section>
+<section id="carrito" class="view" hidden>
+ <h2>Tu carrito</h2>
+ <div id="items"></div>
+ <div id="tot"></div>
+ <form id="f">
+  <h3>Dirección de entrega (ficticia)</h3>
+  <input name="nombre" placeholder="Nombre completo" required>
+  <input name="direccion" placeholder="Ej: Calle 10 #5-20" required>
+  <input name="ciudad" value="Manizales" required>
+  <textarea name="notas" placeholder="Notas para el repartidor"></textarea>
+  <button>Confirmar pedido</button>
+ </form>
+</section>
+<section id="seguimiento" class="view" hidden>
+ <div id="trk"></div>
+ <button class="btn" data-v="historial">Ver historial</button>
+</section>
+<section id="historial" class="view" hidden>
+ <h2>Historial de pedidos</h2>
+ <div id="hist"></div>
+ <button class="btn" data-clear="1">Borrar historial</button>
+</section>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
