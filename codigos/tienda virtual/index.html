@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Caldas Shop - Taller 26</title>
+<link rel="stylesheet" href="styles.css"></head>
+<body>
+<header class="top">
+<a class="logo" href="#" data-go="home">Caldas<span>Shop</span></a>
+<input id="q" type="search" placeholder="Buscar productos...">
+<button class="cartbtn" data-go="cartView">Carrito
+<b id="count">0</b></button>
+</header>
+<nav id="cats" class="cats"></nav>
+<main>
+<section id="home" class="view">
+<div class="hero"><h1>Ofertas de la semana</h1>
+<p>Envío gratis desde $200.000 (simulado)</p></div>
+<div class="layout">
+<aside class="filters"><h3>Filtros</h3>
+<label>Categoría<select id="catSel"></select></label>
+<label>Precio máximo: <b id="pv"></b>
+<input id="price" type="range" min="0" max="1500000"
+step="10000" value="1500000"></label>
+</aside> <div id="grid" class="grid"></div>
+</div></section>
+<section id="cartView" class="view" hidden>
+<h2>Carrito de compras</h2><div id="cartBox"></div></section>
+<section id="checkout" class="view" hidden>
+<h2>Finalizar compra (simulada)</h2>
+<div class="two"><form id="form">
+<input name="nombre" placeholder="Nombre completo" required>
+<input name="correo" type="email" placeholder="Correo" required>
+<input name="dir" placeholder="Dirección de entrega" required>
+<input name="ciudad" placeholder="Ciudad" required>
+<input name="tarjeta" placeholder="Tarjeta ficticia (16 dígitos)"
+required pattern="\d{16}" maxlength="16"> <div class="row">
+<input name="vence" placeholder="MM/AA" required
+pattern="(0[1-9]|1[0-2])/\d{2}">
+<input name="cvv" placeholder="CVV" required pattern="\d{3}"
+maxlength="3"></div> <button class="btn">Confirmar pedido</button>
+<small>Aviso: simulación, no ingrese datos reales.</small>
+</form><div id="sum" class="box"></div></div></section>
+<section id="done" class="view" hidden>
+<div id="doneBox" class="box"></div></section>
+</main>
+<div id="modal" class="modal" hidden>
+<div id="mbox" class="mbox"></div></div>
+<footer>Universidad de Caldas · Programación Web Creativa II ·
+Taller 26</footer>
+<script src="script.js"></script>
+</body>
+</html>
