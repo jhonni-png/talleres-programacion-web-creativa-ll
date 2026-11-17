@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller 30: Banca Digital</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="inst">
+ <b>UNIVERSIDAD DE CALDAS</b>
+ <span>Asignatura: Programación Web Creativa II</span>
+ <span>Docente: Andrés Felipe Osorio Quintero</span>
+ <span>Taller 30: Banca Digital</span>
+</header>
+<div class="aviso">⚠ SIMULACIÓN EDUCATIVA: todos los datos son ficticios.
+ No escriba información bancaria, tarjetas ni contraseñas reales.</div>
+<nav>
+ <b class="logo">🏦 Banco Caldas Edu</b>
+ <span id="who"></span>
+ <button id="out" data-out="1" hidden>Salir</button>
+</nav>
+<main>
+<section id="login">
+ <form id="lf" class="box">
+  <h2>Iniciar sesión</h2>
+  <select name="u">
+   <option value="u1">Ana Prueba (cliente)</option>
+   <option value="u2">Luis Prueba (cliente)</option>
+   <option value="u0">Admin Prueba (administrador)</option>
+  </select>
+  <input name="pin" type="password" placeholder="PIN ficticio: 1234" required>
+  <button>Entrar</button>
+  <p id="lerr" class="bad"></p>
+ </form>
+</section>
+<section id="app" hidden>
+ <h2>Saldo total disponible: <span id="tot"></span></h2>
+ <div id="accs" class="grid"></div>
+ <form id="tf" class="box">
+  <h3>Transferencia simulada</h3>
+  <select id="so" name="o"></select>
+  <select id="sd" name="d"></select>
+  <input name="m" type="number" min="1" step="1" placeholder="Monto COP" required>
+  <input name="s" maxlength="40" placeholder="Descripción (opcional)">
+  <button>Transferir</button>
+  <p id="msg"></p>
+ </form>
+ <h3>Movimientos</h3>
+ <div class="bar">
+  <select id="fk"><option value="">Todos los tipos</option>
+   <option>Ingreso</option><option>Gasto</option></select>
+  <input id="f1" type="date"><input id="f2" type="date">
+ </div>
+ <p id="sum"></p>
+ <div id="chart"></div>
+ <table><thead><tr><th>Fecha</th><th>Cuenta</th><th>Detalle</th>
+  <th>Valor</th></tr></thead><tbody id="txs"></tbody></table>
+</section>
+<section id="admin" hidden>
+ <h2>Panel administrativo</h2>
+ <p id="akp"></p>
+ <table><thead><tr><th>Cuenta</th><th>Titular</th><th>Tipo</th>
+  <th>Saldo</th></tr></thead><tbody id="atab"></tbody></table>
+ <h3>Últimos movimientos del sistema</h3>
+ <table><thead><tr><th>Fecha</th><th>Cuenta</th><th>Detalle</th>
+  <th>Tipo</th><th>Valor</th></tr></thead><tbody id="atx"></tbody></table>
+ <button data-reset="1">Restablecer datos de demostración</button>
+</section>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
