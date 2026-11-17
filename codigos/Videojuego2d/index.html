@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuarzo Clash | Taller Extra 25 - Universidad de Caldas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+ 
+    <main class="stage" id="stage">
+ 
+        <!-- Lienzo donde se dibuja la arena, los luchadores y los efectos -->
+        <canvas id="game" width="1280" height="720" aria-label="Arena de combate"></canvas>
+ 
+        <!-- ================= HUD (interfaz durante el combate) ================= -->
+        <div class="hud" id="hud">
+            <div class="hud-top">
+ 
+                <div class="fighter-panel p1">
+                    <div class="fp-head">
+                        <span class="fp-tag">J1</span>
+                        <span class="fp-name" id="p1Name">EMBER</span>
+                        <span class="pips" id="p1Pips"><i></i><i></i></span>
+                    </div>
+                    <div class="bar" id="p1Bar">
+                        <div class="ghost" id="p1Ghost"></div>
+                        <div class="fill" id="p1Hp"></div>
+                    </div>
+                    <div class="mini-row">
+                        <div class="mini guard">
+                            <span>GUARDIA</span>
+                            <div class="mini-track"><div class="mini-fill" id="p1Guard"></div></div>
+                        </div>
+                        <div class="mini special" id="p1SpecialBox">
+                            <span>ESPECIAL</span>
+                            <div class="mini-track"><div class="mini-fill" id="p1Special"></div></div>
+                        </div>
+                    </div>
+                </div>
+ 
+                <div class="center-clock">
+                    <div class="round-label" id="roundLabel">RONDA 1</div>
+                    <div class="timer" id="timer">60</div>
+                </div>
+ 
+                <div class="fighter-panel p2">
+                    <div class="fp-head">
+                        <span class="pips" id="p2Pips"><i></i><i></i></span>
+                        <span class="fp-name" id="p2Name">TUNDRA</span>
+                        <span class="fp-tag">J2</span>
+                    </div>
+                    <div class="bar" id="p2Bar">
+                        <div class="ghost" id="p2Ghost"></div>
+                        <div class="fill" id="p2Hp"></div>
+                    </div>
+                    <div class="mini-row">
+                        <div class="mini special" id="p2SpecialBox">
+                            <span>ESPECIAL</span>
+                            <div class="mini-track"><div class="mini-fill" id="p2Special"></div></div>
+                        </div>
+                        <div class="mini guard">
+                            <span>GUARDIA</span>
+                            <div class="mini-track"><div class="mini-fill" id="p2Guard"></div></div>
+                        </div>
+                    </div>
+                </div>
+ 
+            </div>
+ 
+            <div class="banner" id="banner">
+                <div class="banner-main" id="bannerMain"></div>
+                <div class="banner-sub" id="bannerSub"></div>
+            </div>
+ 
+            <div class="hint">
+                <div>
+                    <b>J1</b> <kbd>A</kbd><kbd>D</kbd> mover <kbd>W</kbd> saltar
+                    <kbd>F</kbd> golpe <kbd>G</kbd> especial <kbd>H</kbd> defensa
+                </div>
+                <div><kbd>P</kbd> / <kbd>Esc</kbd> pausa</div>
+                <div>
+                    <b>J2</b> <kbd>&larr;</kbd><kbd>&rarr;</kbd> mover <kbd>&uarr;</kbd> saltar
+                    <kbd>K</kbd> golpe <kbd>L</kbd> especial <kbd>J</kbd> defensa
+                </div>
+            </div>
+ 
+            <div class="pause-layer" id="pauseLayer">
+                PAUSA<small>Presiona P o Esc para continuar</small>
+            </div>
+        </div>
+ 
+        <!-- ================= PANTALLA DE INICIO ================= -->
+        <section class="screen active" id="screen-start">
+            <p class="kicker">Universidad de Caldas &middot; Programaci&oacute;n Web Creativa II</p>
+            <h1 class="logo"><span>CUARZO</span><span>CLASH</span></h1>
+            <p class="tagline">Combate arcade 2D para dos jugadores</p>
+            <button class="btn primary" id="btnStart">INICIAR</button>
+            <p class="small-note">Taller extra 25 &middot; Se juega con un teclado f&iacute;sico</p>
+        </section>
+ 
+        <!-- ================= SELECCION DE PERSONAJES ================= -->
+        <section class="screen" id="screen-select">
+            <h2 class="screen-title">ELIGE A TU LUCHADOR</h2>
+            <div class="select-grid">
+                <div class="select-col">
+                    <h3 class="col-title c1">JUGADOR 1 <small>teclas A / D</small></h3>
+                    <div class="cards" id="cardsP1"></div>
+                </div>
+                <div class="vs">VS</div>
+                <div class="select-col">
+                    <h3 class="col-title c2">JUGADOR 2 <small>flechas &larr; / &rarr;</small></h3>
+                    <div class="cards" id="cardsP2"></div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn" id="btnBack">VOLVER</button>
+                <button class="btn primary" id="btnFight">&iexcl;COMBATIR!</button>
+            </div>
+        </section>
+ 
+        <!-- ================= PANTALLA DE RESULTADOS ================= -->
+        <section class="screen" id="screen-result">
+            <p class="kicker">Fin del combate</p>
+            <h2 class="result-title" id="resultTitle">GANA EMBER</h2>
+            <div class="result-score" id="resultScore">2 - 0</div>
+            <ul class="round-log" id="roundLog"></ul>
+            <div class="actions">
+                <button class="btn primary" id="btnRematch">VOLVER A JUGAR</button>
+                <button class="btn" id="btnChange">CAMBIAR PERSONAJES</button>
+                <button class="btn" id="btnMenu">MEN&Uacute;</button>
+            </div>
+        </section>
+ 
+    </main>
+ 
+    <script src="script.js"></script>
+</body>
+</html>
