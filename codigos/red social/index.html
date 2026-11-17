@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EduSocial</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<section id="auth">
+  <div class="hero">
+    <h1>EduSocial</h1>
+    <p>Conecta, comparte y aprende con tus compañeros.</p>
+  </div>
+  <div class="card">
+    <div class="tabs">
+      <button id="tabLogin" class="on">Iniciar sesión</button>
+      <button id="tabReg">Registrarse</button>
+    </div>
+    <form id="authForm">
+      <input id="name" placeholder="Nombre completo" hidden>
+      <input id="email" type="email" placeholder="Correo" required>
+      <input id="pass" type="password" placeholder="Contraseña"
+        required minlength="4">
+      <button id="authBtn" class="btn">Entrar</button>
+    </form>
+  </div>
+</section>
+<div id="app" hidden>
+  <header class="top">
+    <b>EduSocial</b>
+    <input id="search" type="search" placeholder="Buscar publicaciones...">
+    <button id="logout" class="btn">Salir</button>
+  </header>
+  <main class="layout">
+    <aside class="card" id="profile"></aside>
+    <section>
+      <form id="postForm" class="card">
+        <textarea id="postText" placeholder="¿Qué estás pensando?"
+          required></textarea>
+        <input id="postImg" type="url"
+          placeholder="URL de imagen (opcional)">
+        <button class="btn">Publicar</button>
+      </form>
+      <div id="feed"></div>
+    </section>
+    <aside class="card">
+      <h3>Amigos</h3>
+      <ul id="friends"></ul>
+    </aside>
+  </main>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
